@@ -113,7 +113,7 @@ contract ContractTest is Test {
         amounts[0] = 17_290_000 * 1e6;
         amounts[1] = 9500 * 1e18;
         amounts[2] = 406_316 * 1e18;
-        uint256[] memory modes = new uint[](3);
+        uint256[] memory modes = new uint256[](3);
         modes[0] = 0;
         modes[1] = 0;
         modes[2] = 0;
@@ -154,7 +154,7 @@ contract ContractTest is Test {
             assets[0] = address(USDC);
             uint256[] memory amounts = new uint256[](1);
             amounts[0] = 14_435_000 * 1e6;
-            uint256[] memory modes = new uint[](1);
+            uint256[] memory modes = new uint256[](1);
             modes[0] = 0;
             Radiant.flashLoan(address(this), assets, amounts, modes, address(0), new bytes(1), 0);
             return true;

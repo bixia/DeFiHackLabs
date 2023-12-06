@@ -158,7 +158,7 @@ contract ContractTest is DSTest {
             assets[0] = address(USDC_e);
             uint256[] memory amounts = new uint256[](1);
             amounts[0] = PoolV2BorrowAmount;
-            uint256[] memory modes = new uint[](1);
+            uint256[] memory modes = new uint256[](1);
             modes[0] = 0;
             LendingPoolV2.flashLoan(address(this), assets, amounts, modes, address(this), "", 0); // FlashLoan USDC.e
             cheats.roll(block.number + 1); // USD+ buy and redeem not allowed in one block
@@ -189,7 +189,7 @@ contract ContractTest is DSTest {
             assets1[0] = address(USDC);
             uint256[] memory amounts1 = new uint256[](1);
             amounts1[0] = PoolV2BorrowAmount / 2;
-            uint256[] memory modes = new uint[](1);
+            uint256[] memory modes = new uint256[](1);
             modes[0] = 0;
             PoolV3.flashLoan(address(this), assets1, amounts1, modes, address(this), "", 0); // FlashLoan USDC
 

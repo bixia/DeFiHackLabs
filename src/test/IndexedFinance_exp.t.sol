@@ -238,7 +238,7 @@ contract IndexedAttack is BNum, IUniswapV2Callee, Test {
         IIndexPool indexPool = IIndexPool(DEFI5);
         indexPool.gulp(SUSHI);
 
-        uint256[] memory minAmountOut = new uint[](7);
+        uint256[] memory minAmountOut = new uint256[](7);
         for (uint256 i = 0; i < 7; i++) {
             minAmountOut[i] = 0;
         }

@@ -125,7 +125,7 @@ contract ContractTest is Test {
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 50_000 * 1e18;
         amounts[1] = 60_000 * 1e18;
-        uint256[] memory modes = new uint[](2);
+        uint256[] memory modes = new uint256[](2);
         modes[0] = 0;
         modes[1] = 0;
         console.log("1. Borrow 50,000 wstETH and 60,000 WETH from Aave as a flashloan.");

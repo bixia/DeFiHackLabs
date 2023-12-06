@@ -277,7 +277,7 @@ contract CounterTest is Test {
     function test() public {
         console.log("Attacker's WETH token balance: ", WETH.balanceOf(address(this)));
         IERC20[] memory tokens = new IERC20[](1);
-        uint256[] memory amount = new uint[](1);
+        uint256[] memory amount = new uint256[](1);
         tokens[0] = WETH;
         amount[0] = 1000 ether;
         bytes memory userdata;

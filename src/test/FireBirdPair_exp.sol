@@ -76,7 +76,7 @@ contract ContractTest is Test {
 
         address[] memory tokens = new address[](1);
         tokens[0] = address(WMATIC);
-        uint256[] memory amounts = new uint[](1);
+        uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
         bytes memory userData = "";
         Balancer.flashLoan(address(this), tokens, amounts, userData);
@@ -124,7 +124,7 @@ contract ContractTest is Test {
         uint8[] memory dexIds = new uint8[](1);
         dexIds[0] = dexId;
 
-        uint256[] memory results = new uint[](2);
+        uint256[] memory results = new uint256[](2);
         results = Router.swapExactTokensForTokens(
             tokenIn, tokenOut, amountIn, amountOutMin, paths, dexIds, address(this), type(uint256).max
         );

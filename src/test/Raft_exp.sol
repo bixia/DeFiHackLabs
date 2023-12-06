@@ -114,7 +114,7 @@ contract ContractTest is Test {
         assets[0] = address(cbETH);
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 6000 ether;
-        uint256[] memory modes = new uint[](1);
+        uint256[] memory modes = new uint256[](1);
         modes[0] = 0;
         aaveV3.flashLoan(address(this), assets, amounts, modes, address(this), "", 0);
 

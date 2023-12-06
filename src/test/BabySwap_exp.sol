@@ -76,7 +76,7 @@ contract ContractTest is DSTest {
         path1[1] = address(USDT);
         address[] memory factories = new address[](1);
         factories[0] = address(factory);
-        uint256[] memory fees = new uint[](1);
+        uint256[] memory fees = new uint256[](1);
         fees[0] = 0;
         Router.swapExactTokensForTokens(10_000, 0, path1, factories, fees, address(this), block.timestamp);
         // swap token to claim reward
@@ -97,7 +97,7 @@ contract ContractTest is DSTest {
         path[1] = address(USDT);
         address[] memory factories = new address[](1);
         factories[0] = address(0x86407bEa2078ea5f5EB5A52B2caA963bC1F889Da);
-        uint256[] memory fees = new uint[](1);
+        uint256[] memory fees = new uint256[](1);
         fees[0] = 3000;
         Router.swapExactTokensForTokens(
             BABY.balanceOf(address(this)), 0, path, factories, fees, address(this), block.timestamp

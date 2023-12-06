@@ -72,7 +72,7 @@ contract SecondContract {
         assets[0] = address(WETH);
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 524_102 * 1e18;
-        uint256[] memory modes = new uint[](1);
+        uint256[] memory modes = new uint256[](1);
         modes[0] = 0;
         console.log("[7. Aave FlashLoan 524_102 WETH]");
         AaveFlash.flashLoan(address(this), assets, amounts, modes, address(this), "", 0);

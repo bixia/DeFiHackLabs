@@ -77,7 +77,7 @@ contract ContractTest is Test {
         amounts[0] = 606 * 1e8;
         amounts[1] = 10_050_100 * 1e15;
         amounts[2] = 18_000_000 * 1e6;
-        uint256[] memory modes = new uint[](3);
+        uint256[] memory modes = new uint256[](3);
         modes[0] = 0;
         modes[1] = 0;
         modes[2] = 0;

