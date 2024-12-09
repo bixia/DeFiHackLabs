@@ -142,3 +142,7 @@ contract HelperExploitContract is Test {
         BUSDT.approve(address(BUSDT_MetaWin), type(uint256).max);
     }
 }
+
+contract MVP is Test {
+    
+}
