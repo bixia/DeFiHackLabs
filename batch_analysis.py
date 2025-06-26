@@ -32,8 +32,11 @@ def batch_analyze_recent():
                 if exp_dir.is_dir():
                     recent_dirs.append(exp_dir)
     
+    # Sort by date in descending order
+    recent_dirs.sort(key=lambda p: p.as_posix(), reverse=True)
+    
     # Limit to first 5 for demonstration
-    recent_dirs = recent_dirs[:5]
+    # recent_dirs = recent_dirs[:5]
     
     print(f"🚀 Found {len(recent_dirs)} recent exploit directories")
     
@@ -65,10 +68,11 @@ def batch_analyze_recent():
         # Get trace data from Tenderly (try first hash)
         trace_data = None
         tx_hash = tx_info['tx_hashes'][0]
-        print(f"   🔗 Querying Tenderly for {tx_hash[:20]}...")
+        network = tx_info.get('network', 'ethereum')
+        print(f"   🔗 Querying Tenderly for {tx_hash[:20]} on {network}...")
         
         try:
-            trace_data = tenderly.get_transaction_trace(tx_hash)
+            trace_data = tenderly.get_transaction_trace(tx_hash, network)
             if trace_data:
                 print(f"   ✅ Retrieved trace data")
             else:
@@ -76,34 +80,36 @@ def batch_analyze_recent():
         except Exception as e:
             print(f"   ❌ Tenderly error: {e}")
         
-        # Analyze with DeepSeek
-        print(f"   🧠 Analyzing with DeepSeek...")
-        
-        try:
-            analysis = analyzer.analyze_root_cause(tx_info, trace_data)
-            
-            if analysis:
-                print(f"   ✅ Analysis completed")
+        # Analyze with DeepSeek only if trace data is available
+        if trace_data:
+            print(f"   🧠 Analyzing with DeepSeek...")
+            try:
+                analysis = analyzer.analyze_root_cause(tx_info, trace_data)
                 
-                # Generate and save report
-                report = reporter.generate_report(tx_info, trace_data, analysis)
-                report_file = exp_dir / "ROOT_CAUSE_ANALYSIS.md"
-                
-                with open(report_file, 'w', encoding='utf-8') as f:
-                    f.write(report)
-                
-                print(f"   📝 Report saved to {report_file}")
-                
-                # Print brief summary
-                lines = analysis.split('\n')
-                summary_lines = [line for line in lines[:10] if line.strip()]
-                print(f"   📄 Summary: {' '.join(summary_lines)[:100]}...")
-                
-            else:
-                print(f"   ❌ Analysis failed")
-                
-        except Exception as e:
-            print(f"   ❌ DeepSeek error: {e}")
+                if analysis:
+                    print(f"   ✅ Analysis completed")
+                    
+                    # Generate and save report
+                    report = reporter.generate_report(tx_info, trace_data, analysis)
+                    report_file = exp_dir / "ROOT_CAUSE_ANALYSIS.md"
+                    
+                    with open(report_file, 'w', encoding='utf-8') as f:
+                        f.write(report)
+                    
+                    print(f"   📝 Report saved to {report_file}")
+                    
+                    # Print brief summary
+                    lines = analysis.split('\n')
+                    summary_lines = [line for line in lines[:10] if line.strip()]
+                    print(f"   📄 Summary: {' '.join(summary_lines)[:100]}...")
+                    
+                else:
+                    print(f"   ❌ Analysis failed")
+                    
+            except Exception as e:
+                print(f"   ❌ DeepSeek error: {e}")
+        else:
+            print("   ⏩ Skipping analysis due to missing trace data.")
         
         # Rate limiting
         time.sleep(3)

@@ -25,7 +25,7 @@ TENDERLY_BASE_URL = "https://api.tenderly.co/api/v1/public-contract"
 TENDERLY_AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoiNTY3YWQ1ZTEtYzUxNi00NWI1LWI5YmYtZDQ1MWFhYzYzZGMzIiwic2Vzc2lvbl9ub25jZSI6NiwidmFsaWRfdG8iOjE3NDM4NDE2NjV9.9pR6SJomb9vk6c70wSRvBB5t3SdYext9h-hE0X2Eo2g"
 
 # DeepSeek Configuration
-DEEPSEEK_API_KEY = "sk-430607f5a0b14b25ab6a97eeb7d39ec3"
+DEEPSEEK_API_KEY = "sk-34b54effa6154e99b20833809ea77945"
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
 
 # Model Configuration
