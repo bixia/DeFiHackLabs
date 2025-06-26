@@ -29,7 +29,8 @@ DEEPSEEK_API_KEY = "sk-34b54effa6154e99b20833809ea77945"
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
 
 # Model Configuration
-USE_REASONING_MODEL = True  # Set to True to use DeepSeek R1, False for regular deepseek-chat
+# USE_REASONING_MODEL = True  # Set to True to use DeepSeek R1, False for regular deepseek-chat
+USE_REASONING_MODEL = False  # Set to True to use DeepSeek R1, False for regular deepseek-chat
 REASONING_MODEL_NAME = "deepseek-reasoner"  # DeepSeek-R1-0528 reasoning model
 REGULAR_MODEL_NAME = "deepseek-chat"  # DeepSeek-V3-0324 regular model
 
