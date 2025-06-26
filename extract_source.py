@@ -177,7 +177,30 @@ def get_source_code(contract_info, chain, output_dir):
         return False
 
 def main():
-    test_dir = Path("/home/comcat/dev/DeFiHackLabs/src/test")
+    # Use current working directory instead of hardcoded path
+    current_dir = Path.cwd()
+    test_dir = current_dir / "src" / "test"
+    
+    # Check if test directory exists
+    if not test_dir.exists():
+        print(f"Test directory not found: {test_dir}")
+        print("Looking for alternative test directory structures...")
+        
+        # Try alternative locations
+        alternative_paths = [
+            current_dir / "test",
+            current_dir / "src",
+            current_dir / "contracts",
+        ]
+        
+        for alt_path in alternative_paths:
+            if alt_path.exists():
+                print(f"Found alternative directory: {alt_path}")
+                test_dir = alt_path
+                break
+        else:
+            print("No test directory found. Please run this script from the DeFiHackLabs root directory.")
+            return
     
     # Get all year-month directories (e.g., 2024-01)
     test_dirs = [d for d in test_dir.iterdir() if d.is_dir() and re.match(r'20\d{2}-\d{2}', d.name)]
@@ -202,8 +225,8 @@ def main():
                 print(f"  Name: {contract['name']}, Address: {contract['ca']}")
             print(f"Chain: {chain}")
             
-            # Create output directory path
-            output_dir = Path("/home/comcat/dev/DeFiHackLabs/source") / dir_path.name / test_file.stem
+            # Create output directory path using current directory
+            output_dir = current_dir / "source" / dir_path.name / test_file.stem
             output_dir.mkdir(parents=True, exist_ok=True)
             
             # Copy the test file to the output directory
