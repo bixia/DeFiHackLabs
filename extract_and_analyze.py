@@ -13,6 +13,7 @@ import os
 import re
 import json
 import requests
+import requests.exceptions
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -22,8 +23,15 @@ from concurrent.futures import ThreadPoolExecutor
 # Configuration
 TENDERLY_BASE_URL = "https://api.tenderly.co/api/v1/public-contract"
 TENDERLY_AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoiNTY3YWQ1ZTEtYzUxNi00NWI1LWI5YmYtZDQ1MWFhYzYzZGMzIiwic2Vzc2lvbl9ub25jZSI6NiwidmFsaWRfdG8iOjE3NDM4NDE2NjV9.9pR6SJomb9vk6c70wSRvBB5t3SdYext9h-hE0X2Eo2g"
+
+# DeepSeek Configuration
 DEEPSEEK_API_KEY = "sk-430607f5a0b14b25ab6a97eeb7d39ec3"
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
+
+# Model Configuration
+USE_REASONING_MODEL = True  # Set to True to use DeepSeek R1, False for regular deepseek-chat
+REASONING_MODEL_NAME = "deepseek-reasoner"  # DeepSeek-R1-0528 reasoning model
+REGULAR_MODEL_NAME = "deepseek-chat"  # DeepSeek-V3-0324 regular model
 
 # Headers for API requests
 TENDERLY_HEADERS = {
@@ -55,7 +63,8 @@ class TransactionExtractor:
         self.tx_hash_patterns = [
             r'https://(?:etherscan\.io|bscscan\.com|polygonscan\.com|arbiscan\.io|ftmscan\.com|snowtrace\.io|blastscan\.io|lineascan\.build|basescan\.org|optimistic\.etherscan\.io)/tx/0x([a-fA-F0-9]{64})',
             r'https://(?:explorer\.phalcon\.xyz|app\.blocksec\.com)/(?:tx/)?(?:eth/|bsc/|polygon/|arbitrum/|optimism/|base/|blast/)?(?:tx/)?0x([a-fA-F0-9]{64})',
-            r'0x([a-fA-F0-9]{64})',  # Direct hash pattern
+            r'(?:Attack Tx|Transaction|Tx).*?0x([a-fA-F0-9]{64})',  # Transaction hash in comments
+            r'//.*?(?:tx|transaction).*?0x([a-fA-F0-9]{64})',  # Transaction hash in comments
         ]
     
     def extract_tx_info_from_file(self, file_path: Path) -> Dict:
@@ -251,52 +260,177 @@ class TenderlyAPI:
             return None
 
 class DeepSeekAnalyzer:
-    """Analyzer using DeepSeek API"""
+    """Advanced DeepSeek Analyzer supporting both regular and reasoning models"""
     
-    def __init__(self):
+    def __init__(self, use_reasoning: bool = USE_REASONING_MODEL):
         self.api_key = DEEPSEEK_API_KEY
         self.base_url = DEEPSEEK_BASE_URL
         self.headers = DEEPSEEK_HEADERS
+        self.use_reasoning = use_reasoning
+        
+        if use_reasoning:
+            self.model_name = REASONING_MODEL_NAME
+            self.is_reasoning_model = True
+            print(f"🧠 Using DeepSeek Reasoning Model: {self.model_name} (DeepSeek-R1-0528)")
+            print("⚡ Reasoning mode enabled - expect deeper analysis but longer processing time")
+        else:
+            self.model_name = REGULAR_MODEL_NAME
+            self.is_reasoning_model = False
+            print(f"🧠 Using Regular DeepSeek Model: {self.model_name} (DeepSeek-V3-0324)")
+            
+        print(f"🔗 API Base URL: {self.base_url}")
     
     def analyze_root_cause(self, tx_info: Dict, trace_data: Dict) -> Optional[str]:
-        """Analyze root cause using DeepSeek API"""
+        """Analyze root cause using DeepSeek API with optional reasoning model"""
         try:
+            # Get contract source codes
+            contract_sources = self._get_contract_sources(tx_info)
+            
             # Prepare the analysis prompt
-            prompt = self._create_analysis_prompt(tx_info, trace_data)
+            prompt = self._create_analysis_prompt(tx_info, trace_data, contract_sources)
             
-            payload = {
-                "model": "deepseek-chat",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are an expert blockchain security analyst specializing in DeFi exploit analysis. Provide detailed, technical root cause analysis."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                "temperature": 0.1,
-                "max_tokens": 4000
-            }
+            # Configure payload based on model type
+            if self.is_reasoning_model:
+                # DeepSeek R1 reasoning model configuration
+                payload = {
+                    "model": self.model_name,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": f"""You are an elite blockchain security researcher with deep expertise in DeFi exploit analysis. Use your reasoning capabilities to conduct a comprehensive technical analysis.
+
+{prompt}
+
+Please use step-by-step reasoning to:
+1. Carefully analyze the contract source code to identify the exact vulnerability
+2. Trace through the execution flow using the provided trace data
+3. Explain how the POC exploits the identified weakness
+4. Derive a comprehensive vulnerability pattern that can be used to find similar issues
+5. Provide actionable detection and mitigation strategies
+
+Think through each step carefully and provide detailed technical reasoning for your conclusions."""
+                        }
+                    ]
+                    # Note: R1 models don't support temperature, max_tokens, or system messages
+                }
+                timeout = 300  # Longer timeout for reasoning models
+            else:
+                # Regular DeepSeek model configuration
+                payload = {
+                    "model": self.model_name,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": """You are an elite blockchain security researcher and exploit analyst with deep expertise in:
+- Smart contract vulnerabilities and attack vectors
+- On-chain transaction analysis and trace interpretation
+- Solidity/EVM internals and assembly-level analysis
+- DeFi protocol security and economic attack mechanisms
+- Vulnerability pattern recognition and classification
+
+Your analysis style is:
+- Extremely technical and detailed
+- Evidence-based (every claim backed by trace data or code)
+- Focused on actionable insights for security researchers
+- Oriented toward creating reusable knowledge patterns
+
+You excel at:
+- Correlating transaction traces with source code
+- Identifying subtle vulnerability patterns
+- Explaining complex attack mechanisms step-by-step
+- Creating detection methodologies for vulnerability classes
+- Providing concrete, implementable security recommendations
+
+Your goal is to produce analysis that serves as a reference for finding and preventing similar vulnerabilities across the DeFi ecosystem."""
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "temperature": 0.1,
+                    "max_tokens": 8000
+                }
+                timeout = 120
             
-            response = requests.post(self.base_url, headers=self.headers, json=payload, timeout=120)
+            print(f"🚀 Sending request to DeepSeek {self.model_name}...")
+            if self.is_reasoning_model:
+                print("⏳ Reasoning model is thinking deeply - this may take a while...")
+                
+            response = requests.post(self.base_url, headers=self.headers, json=payload, timeout=timeout)
             
             if response.status_code == 200:
                 result = response.json()
-                return result['choices'][0]['message']['content']
+                analysis_content = result['choices'][0]['message']['content']
+                
+                # Log token usage if available
+                if 'usage' in result:
+                    usage = result['usage']
+                    print(f"📊 Token usage - Prompt: {usage.get('prompt_tokens', 'N/A')}, Completion: {usage.get('completion_tokens', 'N/A')}, Total: {usage.get('total_tokens', 'N/A')}")
+                
+                if self.is_reasoning_model:
+                    print("✅ Reasoning analysis completed with deep technical insights")
+                else:
+                    print("✅ Standard analysis completed")
+                    
+                return analysis_content
             else:
-                print(f"DeepSeek API error: {response.status_code}")
+                print(f"❌ DeepSeek API error: {response.status_code}")
+                print(f"Response: {response.text[:300]}...")
                 return None
                 
+        except requests.exceptions.Timeout:
+            print(f"⏰ Request timeout after {timeout}s - reasoning models can take longer")
+            return None
         except Exception as e:
-            print(f"Error with DeepSeek analysis: {e}")
+            print(f"❌ Error with DeepSeek analysis: {e}")
             return None
     
-    def _create_analysis_prompt(self, tx_info: Dict, trace_data: Dict) -> str:
+    def _get_contract_sources(self, tx_info: Dict) -> Dict[str, str]:
+        """Get contract source codes from the _exp directory"""
+        contract_sources = {}
+        
+        try:
+            # Get the directory path from file_path
+            file_path = Path(tx_info.get('file_path', ''))
+            exp_dir = file_path.parent
+            
+            # Find all .sol files in the directory (except the POC file itself)
+            sol_files = list(exp_dir.glob("*.sol"))
+            
+            for sol_file in sol_files:
+                # Skip the POC file itself since we already have it
+                if sol_file.name == file_path.name:
+                    continue
+                
+                try:
+                    with open(sol_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        # Limit file size to avoid token limit issues
+                        if len(content) > 50000:  # ~50KB limit per file
+                            content = content[:50000] + "\n\n// ... (truncated for analysis) ..."
+                        contract_sources[sol_file.name] = content
+                        print(f"📄 Loaded contract source: {sol_file.name} ({len(content)} chars)")
+                except Exception as e:
+                    print(f"⚠️ Could not read {sol_file.name}: {e}")
+                    
+        except Exception as e:
+            print(f"⚠️ Error loading contract sources: {e}")
+        
+        return contract_sources
+    
+    def _create_analysis_prompt(self, tx_info: Dict, trace_data: Dict, contract_sources: Dict[str, str] = None) -> str:
         """Create detailed analysis prompt"""
+        
+        # Format contract sources section
+        contract_sources_section = ""
+        if contract_sources:
+            contract_sources_section = "## Contract Source Codes\n\n"
+            for filename, source_code in contract_sources.items():
+                contract_sources_section += f"### {filename}\n```solidity\n{source_code}\n```\n\n"
+        
         prompt = f"""
-# DeFi Exploit Analysis Request
+# DeFi Exploit Deep Analysis Request
 
 ## Project Information
 - **Project Name**: {tx_info.get('project_name', 'Unknown')}
@@ -312,26 +446,150 @@ class DeepSeekAnalyzer:
 - **Vulnerable Contract**: {', '.join(tx_info.get('vulnerable_contracts', []))}
 - **Attack Contract**: {', '.join(tx_info.get('attack_contracts', []))}
 
-## POC Code
+## POC Source Code
 ```solidity
-{tx_info.get('poc_code', '')[:3000]}...
+{tx_info.get('poc_code', '')[:6000]}...
 ```
+
+{contract_sources_section}
 
 ## Transaction Trace Data
 {self._format_trace_for_analysis(trace_data)}
 
-## Analysis Request
-Please provide a comprehensive root cause analysis including:
+## Deep Analysis Requirements
 
-1. **Vulnerability Summary**: Brief description of the main vulnerability
-2. **Technical Details**: Step-by-step breakdown of the exploit
-3. **Root Cause**: What specific code/logic flaw enabled the attack
-4. **Attack Vector**: How the attacker exploited the vulnerability
-5. **Impact Assessment**: Financial and technical impact
-6. **Mitigation Strategies**: How this could have been prevented
-7. **Lessons Learned**: Key takeaways for developers
+Please provide an extremely detailed technical analysis that combines the CONTRACT SOURCE CODE, POC CODE, and TRANSACTION TRACE DATA. This is a comprehensive analysis that must deeply examine the actual vulnerable contract implementation.
 
-Please focus on technical accuracy and provide actionable insights.
+### 1. **Vulnerability Summary**
+- Brief description of the main vulnerability type
+- Classification (e.g., reentrancy, price manipulation, logic flaw, etc.)
+- Identify the exact vulnerable function(s) in the contract source code
+
+### 2. **Step-by-Step Exploit Analysis (EXTREMELY DETAILED)**
+**Critical Requirements:**
+- For each step, you MUST reference the actual contract source code (not just POC)
+- Correlate each step with specific function calls from the trace data
+- Reference specific lines/functions in BOTH the vulnerable contract AND the POC code
+- Explain exactly what happens at the EVM/Solidity level
+- Show how each function call modifies contract state
+- Trace the exact flow of funds through the contracts
+- Include gas consumption and why certain operations succeed/fail
+
+**Mandatory Format for Each Step:**
+```
+Step X: [Detailed Description]
+- Trace Evidence: [Exact function call signature, input data, output from trace]
+- Contract Code Reference: [Specific function name, line numbers, and code snippet from vulnerable contract]
+- POC Code Reference: [How the POC triggers this step]
+- EVM State Changes: [Exact storage/memory changes]
+- Fund Flow: [How tokens/ETH move between addresses]
+- Technical Mechanism: [Why this step works at the blockchain level]
+- Vulnerability Exploitation: [How this step exploits the bug]
+```
+
+**Additional Requirements:**
+- Analyze AT LEAST 10-15 detailed steps
+- For each asset transfer in the trace, explain the contract logic that enabled it
+- Cross-reference function calls in trace with actual contract functions
+- Explain how the POC manipulates the vulnerable contract's state
+
+### 3. **Root Cause Deep Dive (Contract Source Code Analysis)**
+**Requirements:**
+- Quote the EXACT vulnerable code from the contract source code (function names, line numbers)
+- Explain the specific implementation flaw in the contract code
+- Show line-by-line how the vulnerability manifests in the source code
+- Compare vulnerable code patterns with secure implementations
+- Include assembly/Yul code analysis where relevant
+- Demonstrate how the contract's state management is flawed
+
+**Format:**
+```
+Vulnerable Code Location: [Contract file name, function name, approximate line numbers]
+Code Snippet:
+[Exact vulnerable code from source]
+
+Flaw Analysis:
+- [What's wrong with this code]
+- [Why the implementation is insecure]
+- [What the developer missed or did incorrectly]
+
+Exploitation Mechanism:
+- [How the POC manipulates this code]
+- [What inputs/conditions trigger the vulnerability]
+```
+
+### 4. **Technical Exploit Mechanics**
+- Detailed explanation of why each attack step succeeds
+- How the attacker bypassed security mechanisms
+- Mathematical/cryptographic principles involved (if any)
+- Memory/storage manipulation techniques used
+
+### 5. **Bug Pattern Identification**
+**Provide a reusable bug pattern template:**
+```
+Bug Pattern: [Name]
+Description: [What this vulnerability pattern looks like]
+Code Characteristics:
+- [Specific code patterns to look for]
+- [Common implementation mistakes]
+- [Dangerous function combinations]
+
+Detection Methods:
+- [Static analysis techniques]
+- [Code review checklist items]
+- [Automated tools that can catch this]
+
+Variants:
+- [Different ways this bug can manifest]
+- [Related vulnerability patterns]
+```
+
+### 6. **Vulnerability Detection Guide**
+**How to find similar vulnerabilities:**
+- Specific code patterns to search for in other projects
+- Static analysis rules that would catch this bug type
+- Manual code review techniques
+- Testing strategies to uncover similar flaws
+- Tools and queries for large-scale detection
+
+### 7. **Impact Assessment**
+- Precise financial impact calculation
+- Technical impact on protocol functionality
+- Potential for similar attacks on other protocols
+
+### 8. **Advanced Mitigation Strategies**
+- Immediate fixes with code examples
+- Long-term architectural improvements
+- Defense-in-depth strategies
+- Monitoring and detection systems
+
+### 9. **Lessons for Security Researchers**
+- How this vulnerability type can be discovered
+- Research methodologies that would uncover similar issues
+- Red flags during code review
+- Testing approaches for this bug class
+
+## Critical Requirements:
+1. **MANDATORY Source Code Analysis**: You MUST extensively reference and quote from the actual contract source code. Every technical claim must be backed by specific code snippets from the vulnerable contracts.
+
+2. **Trace-Code Correlation**: For every function call in the trace data, identify and explain the corresponding function in the contract source code. Show how the trace execution flow maps to the contract logic.
+
+3. **Detailed Step-by-Step Analysis**: Provide at least 10-15 extremely detailed steps that combine:
+   - Exact trace data (function calls, inputs, outputs)
+   - Specific contract source code being executed
+   - POC code that triggers each step
+   - State changes and fund movements
+
+4. **Assembly/Yul Analysis**: Since this appears to involve Yul optimization, analyze the relevant assembly code in the contracts and explain how it's exploited.
+
+5. **Vulnerability Pattern Recognition**: Create a comprehensive bug pattern template that can be used to find similar vulnerabilities in other contracts.
+
+6. **Actionable Detection Methods**: Provide specific, implementable techniques for finding similar bugs, including:
+   - Exact code patterns to search for
+   - Static analysis rules
+   - Manual review techniques
+
+**IMPORTANT**: This analysis must be a comprehensive technical deep-dive that serves as a definitive reference for understanding this vulnerability class. Do not provide superficial analysis - every claim must be backed by specific code references and trace evidence.
         """
         return prompt
     
@@ -348,55 +606,106 @@ Please focus on technical accuracy and provide actionable insights.
         formatted.append(f"- **Block Number**: {trace_data.get('block_number', 'N/A')}")
         formatted.append(f"- **Contract Address**: {trace_data.get('contract_address', 'N/A')}")
         formatted.append(f"- **Gas Used**: {trace_data.get('call_trace', {}).get('gas_used', 'N/A')}")
+        formatted.append(f"- **Gas Limit**: {trace_data.get('gas_limit', 'N/A')}")
+        formatted.append(f"- **Gas Price**: {trace_data.get('gas_price', 'N/A')}")
+        formatted.append(f"- **Value**: {trace_data.get('value', 'N/A')}")
+        formatted.append("")
         
         # Asset Changes (most important for DeFi exploits)
         if trace_data.get('asset_changes'):
-            formatted.append("\n### Asset Changes (Token Transfers)")
-            for i, change in enumerate(trace_data['asset_changes'][:20]):  # Show first 20
+            formatted.append("### Asset Changes (Critical for Exploit Analysis)")
+            for i, change in enumerate(trace_data['asset_changes'][:25]):  # Show more transfers
                 if change.get('type') == 'Transfer':
                     token_info = change.get('token_info', {})
                     formatted.append(f"**Transfer #{i+1}:**")
                     formatted.append(f"  - Token: {token_info.get('symbol', 'Unknown')} ({token_info.get('name', 'Unknown')})")
+                    formatted.append(f"  - Contract: {token_info.get('address', 'N/A')}")
+                    formatted.append(f"  - Decimals: {token_info.get('decimals', 'N/A')}")
                     formatted.append(f"  - Amount: {change.get('amount', '0')}")
                     formatted.append(f"  - Raw Amount: {change.get('raw_amount', '0')}")
                     formatted.append(f"  - USD Value: ${change.get('dollar_value', '0')}")
                     formatted.append(f"  - From: {change.get('from', 'N/A')}")
                     formatted.append(f"  - To: {change.get('to', 'N/A')}")
+                    if change.get('trace_address'):
+                        formatted.append(f"  - Trace Address: {change.get('trace_address', 'N/A')}")
                     formatted.append("")
         
         # Balance Changes
         if trace_data.get('balance_changes'):
             formatted.append("### Balance Changes")
-            for i, balance_change in enumerate(trace_data['balance_changes'][:10]):  # Show first 10
+            for i, balance_change in enumerate(trace_data['balance_changes'][:15]):  # Show more
                 formatted.append(f"**Balance Change #{i+1}:**")
                 formatted.append(f"  - Address: {balance_change.get('address', 'N/A')}")
                 formatted.append(f"  - Before: {balance_change.get('before', 'N/A')}")
                 formatted.append(f"  - After: {balance_change.get('after', 'N/A')}")
+                formatted.append(f"  - Difference: {balance_change.get('diff', 'N/A')}")
                 formatted.append("")
         
-        # Function Calls Summary
+        # Detailed Function Calls
         if trace_data.get('call_trace', {}).get('calls'):
             calls = trace_data['call_trace']['calls']
             formatted.append(f"### Function Calls ({len(calls)} total)")
-            for i, call in enumerate(calls[:10]):  # Show first 10
+            for i, call in enumerate(calls[:15]):  # Show more calls
                 formatted.append(f"**Call #{i+1}:**")
                 formatted.append(f"  - Type: {call.get('call_type', 'N/A')}")
                 formatted.append(f"  - From: {call.get('from', 'N/A')}")
                 formatted.append(f"  - To: {call.get('to', 'N/A')}")
+                formatted.append(f"  - Value: {call.get('value', 'N/A')}")
                 formatted.append(f"  - Gas Used: {call.get('gas_used', 'N/A')}")
+                formatted.append(f"  - Gas: {call.get('gas', 'N/A')}")
                 formatted.append(f"  - Function: {call.get('function_op', 'N/A')}")
+                formatted.append(f"  - Function Name: {call.get('function_name', 'N/A')}")
+                if call.get('input'):
+                    formatted.append(f"  - Input Data: {call.get('input', 'N/A')[:100]}...")
+                if call.get('output'):
+                    formatted.append(f"  - Output: {call.get('output', 'N/A')[:100]}...")
                 formatted.append("")
         
-        # Event Logs Summary
+        # Event Logs (detailed)
         if trace_data.get('logs'):
             formatted.append(f"### Event Logs ({len(trace_data['logs'])} total)")
-            formatted.append("Note: Detailed event logs available in full trace data")
-            formatted.append("")
+            for i, log in enumerate(trace_data['logs'][:20]):  # Show more logs
+                formatted.append(f"**Event #{i+1}:**")
+                formatted.append(f"  - Address: {log.get('address', 'N/A')}")
+                formatted.append(f"  - Topics: {log.get('topics', 'N/A')}")
+                formatted.append(f"  - Data: {log.get('data', 'N/A')[:100]}...")
+                if log.get('decoded'):
+                    formatted.append(f"  - Decoded: {log.get('decoded', 'N/A')}")
+                formatted.append("")
         
-        # State Changes
+        # State Changes (detailed)
         if trace_data.get('state_diff'):
             formatted.append(f"### State Changes ({len(trace_data['state_diff'])} modifications)")
-            formatted.append("Note: Contract storage state was modified during execution")
+            for i, state_change in enumerate(trace_data['state_diff'][:15]):  # Show more changes
+                formatted.append(f"**State Change #{i+1}:**")
+                formatted.append(f"  - Address: {state_change.get('address', 'N/A')}")
+                formatted.append(f"  - Key: {state_change.get('key', 'N/A')}")
+                formatted.append(f"  - Before: {state_change.get('before', 'N/A')}")
+                formatted.append(f"  - After: {state_change.get('after', 'N/A')}")
+                formatted.append("")
+        
+        # Main call trace details
+        if trace_data.get('call_trace'):
+            main_trace = trace_data['call_trace']
+            formatted.append("### Main Call Trace Details")
+            formatted.append(f"- **From**: {main_trace.get('from', 'N/A')}")
+            formatted.append(f"- **To**: {main_trace.get('to', 'N/A')}")
+            formatted.append(f"- **Value**: {main_trace.get('value', 'N/A')}")
+            formatted.append(f"- **Gas**: {main_trace.get('gas', 'N/A')}")
+            formatted.append(f"- **Gas Used**: {main_trace.get('gas_used', 'N/A')}")
+            formatted.append(f"- **Call Type**: {main_trace.get('call_type', 'N/A')}")
+            if main_trace.get('input'):
+                formatted.append(f"- **Input**: {main_trace.get('input', 'N/A')[:200]}...")
+            if main_trace.get('output'):
+                formatted.append(f"- **Output**: {main_trace.get('output', 'N/A')[:200]}...")
+            formatted.append("")
+        
+        # Additional metadata
+        if trace_data.get('metadata'):
+            formatted.append("### Additional Metadata")
+            metadata = trace_data['metadata']
+            for key, value in metadata.items():
+                formatted.append(f"- **{key}**: {value}")
             formatted.append("")
         
         return '\n'.join(formatted)

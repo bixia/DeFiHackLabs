@@ -22,7 +22,7 @@ def test_single_file():
     reporter = ReportGenerator()
     
     # Test with H2O exploit file
-    h2o_file = Path("source/2025-03/H2O_exp/H2O_exp.sol")
+    h2o_file = Path("source/2025-03/OneInchFusionV1SettlementHack.sol_exp/OneInchFusionV1SettlementHack.sol_exp.sol")
     
     if not h2o_file.exists():
         print(f"❌ File not found: {h2o_file}")
