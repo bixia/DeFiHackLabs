@@ -98,7 +98,7 @@ def main():
     print("🚀 Starting Single Project DeFi Analysis")
     
     # Default to YBToken_exp for demonstration
-    project_path = "source/2025-04/YBToken_exp/YBToken_exp.sol"
+    project_path = "source/2025-03/OneInchFusionV1SettlementHack.sol_exp/OneInchFusionV1SettlementHack.sol_exp.sol"
     
     # Allow command line argument
     if len(sys.argv) > 1:

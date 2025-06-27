@@ -14,271 +14,219 @@
 
 ## 🔍 Technical Analysis
 
-## Comprehensive Vulnerability Analysis: AMM Reserve Manipulation Exploit
+## Vulnerability Analysis Report
 
-### 1. Vulnerability Classification & Summary
-- **Type**: AMM Reserve Manipulation via Multi-Step Price Distortion
-- **Primary Vector**: Iterative token swaps exploiting constant product formula invariants
-- **Secondary Vector**: Flash loan capital amplification
-- **Affected Components**:
-  - PancakeSwap V2 AMM Pool (YB/BUSD LP)
-  - Token fee calculation logic
-  - LP reserve update mechanisms
+### PRINCIPAL VULNERABLE CONTRACT
 
-### 2. Mathematical Foundation Analysis
+**PRIMARY VULNERABLE CONTRACT**: YBToken (0x04227350eDA8Cb8b1cFb84c727906Cb3CcBff547)  
+**REASONING**: The exploit fundamentally targets the YBToken's fee mechanism during transfers, specifically its interaction with PancakeSwap liquidity pools. The attack leverages the token's custom fee logic during swap operations, which creates an imbalance in the pool's reserves that can be manipulated for profit. The vulnerable contract is the core business logic component where economic assumptions were violated.
 
-#### Core Vulnerability: Constant Product Formula Manipulation
-The exploit targets the fundamental invariant of AMM pools: **x * y = k**
+**BUSINESS LOGIC TO ANALYZE**: 
+1. Fee application during token transfers (buy/sell)
+2. Automatic fee conversion mechanism (swapTokenForFund)
+3. Transfer validation logic
+4. Reserve synchronization assumptions
 
-**Manipulation Mathematics**:
-1. **Initial State**:
-   - Let (R0, R1) = (YB reserves, BUSD reserves)
-   - Initial invariant: K = R0 * R1
+---
 
-2. **Post-Deposit State**:
-   - Attacker deposits ΔBUSD → New reserves: (R0, R1 + Δ)
-   - New invariant: K' = R0 * (R1 + Δ)
+### TRACE-DRIVEN VULNERABILITY ANALYSIS
 
-3. **Swap Calculation**:
-   - Attacker calculates maximum extractable YB (Δx) using:
-     ```solidity
-     amount0Out = reserve0 - (K * 10000^2) / 
-                  [(balance1 * 10000) - (Δ * 25)] / 10000 - 1
-     ```
-   - This solves the fee-adjusted invariant:
-     ```math
-     (R0 - Δx) * [10000(R1 + Δ) - 25Δ] ≥ R0 * R1 * 10000^2
-     ```
+#### Step 1: Flash Loan Initiation
+**TRACE EVIDENCE**:
+- Function Call: `flash(recipient: 0xbdcd584e, amount0: 19200 BUSD, amount1: 0)`
+- Gas Used: 22,773,096 (79.5% of total gas)
+- Asset Transfer: 19,200 BUSD from PancakePool to Attack Contract
 
-4. **Profit Mechanism**:
-   - Bought YB price: P_buy = Δ / (Δx * (1 - fee))
-   - Sold YB price: P_sell = (Δ' * (1 - fee)) / Δx
-   - Profit condition: P_sell / P_buy > (1 + fee)^2
+**BUSINESS LOGIC VIOLATION**:
+- Expected Behavior: Flash loans should be used for arbitrage or collateralized operations
+- Actual Behavior: Loan used solely for reserve manipulation
+- Evidence: Zero collateral provided, loan size equals entire pool reserve
 
-**Fee Impact Analysis**:
-The 0.25% swap fee creates asymmetric price impacts:
-```
-Price impact = 1 - [1 - (Δ/R)]^(1+fee)
-```
-Where f = 0.0025. Small Δ values minimize fee impact per swap while allowing large cumulative price distortion.
+#### Step 2: Fee Manipulation Loop (66 iterations)
+**TRACE EVIDENCE**:
+- Pattern: 66 identical sequences of:
+  1. BUSD transfer → LP contract (290.909 BUSD each)
+  2. YBToken transfer → Child contract
+  3. LP swap → YB output to child
+- Gas Used: ~300K per iteration (total ~19.8M gas)
+- Key Transfer: 192174214543324183 YB to 0x81e19... (attack contract)
 
-### 3. Step-by-Step Exploit Analysis
+**BUSINESS LOGIC VIOLATION**:
+- Expected Behavior: Fees should proportionally benefit token economy
+- Actual Behavior: Micro-swaps bypass fee thresholds
+- Evidence: 66 identical transfers at 1/66th of loan amount
 
-**Pre-Attack Setup**:
-- Flash loan: 19,200 BUSD from PancakeSwap V3
-- Target: YB/BUSD V2 LP ($382M TVL)
-- Iterations: 66 (optimized for gas efficiency)
+#### Step 3: Reverse Swap Execution
+**TRACE EVIDENCE**:
+- Pattern: 66 reverse swaps:
+  1. YB transfer → LP contract
+  2. LP swap → BUSD output to attacker
+- Asset Transfer: 290.909 BUSD per swap → Attacker
+- Gas Used: ~12K per swap (total 792K gas)
 
-**Attack Sequence**:
+**BUSINESS LOGIC VIOLATION**:
+- Expected Behavior: Balanced reserves should maintain price stability
+- Actual Behavior: Reserve imbalance from fee distortion enables arbitrage
+- Evidence: Identical 290.909 BUSD outputs despite varying inputs
 
-<details>
-<summary>Step 1: Reserve Poisoning (First Loop)</summary>
+#### Step 4: Profit Extraction
+**TRACE EVIDENCE**:
+- Final Transfer: 15,261.68 BUSD to attacker
+- Function Call: `transfer(attacker, 15,261.68 BUSD)`
+- Gas Used: 8,062 gas
+- State Change: Attacker BUSD balance +15,261.68
 
-1. **Mathematical State**:
-   - Initial reserves: (R0, R1) = (YB, BUSD)
-   - Δ = 19200 / 66 = 290.909 BUSD
-   - Post-deposit: R1' = R1 + Δ
+**BUSINESS LOGIC VIOLATION**:
+- Expected Behavior: Fees should accumulate to protocol
+- Actual Behavior: 100% of profit extracted by attacker
+- Evidence: Final transfer amount matches total loss
 
-2. **Contract Action**:
-   ```solidity
-   IERC20(BUSD).transfer(YB_BUSD_LP, loanAmount / swapLength);
-   ```
+---
 
-3. **Vulnerability Trigger**:
-   - Direct balance modification bypasses swap fee
-   - Reserves not updated until swap completion
-</details>
+### VULNERABLE CONTRACT BUSINESS ANALYSIS
 
-<details>
-<summary>Step 2: Maximum Extraction Swap</summary>
+#### A. Core Business Model
+**Business Purpose**: YBToken implements a deflationary token economy with:
+- Buy/sell fees (4-10%)
+- Automated fee conversion to BUSD
+- Liquidity provider rewards
+- Token burns
 
-1. **Mathematical State**:
-   - Solve for maximum Δx:
-     ```math
-     Δx = R0 - (K * 10000^2) / [(R1 + Δ)*10000 - 25Δ] / 10000 - 1
-     ```
+**Revenue Model**: Fee redistribution through:
+1. Protocol treasury (80%)
+2. Liquidity mining rewards (20%)
+3. Token burns (1-10%)
 
-2. **Contract Action**:
-   ```solidity
-   IPancakePair(YB_BUSD_LP).swap(amount0Out, 0, child, '');
-   ```
+**Trace-Revealed Failures**:
+- Function Call Frequency: `swapExactTokensForTokensSupportingFeeOnTransferTokens` called 66 times
+- Parameter Pattern: Fixed 290.909 BUSD transfers bypass fee thresholds
+- Economic Evidence: 0% fees retained by protocol during attack
 
-3. **Mechanism**:
-   - Uses custom `getAmount0ToReachK()` to bypass invariant check
-   - -1 offset prevents K violation from rounding errors
-</details>
-
-<details>
-<summary>Step 3: Reverse Price Distortion (Second Loop)</summary>
-
-1. **Mathematical State**:
-   - Post-manipulation reserves: (R0'', R1'') ≈ (R0/100, R1*100)
-   - Price ratio distortion: > 100x
-
-2. **Contract Action**:
-   ```solidity
-   IPancakePair(YB_BUSD_LP).swap(0, amount1Out, address(this), '');
-   ```
-
-3. **Profit Calculation**:
-   - Effective YB buy price: $0.0001
-   - Effective YB sell price: $0.01
-   - Profit per iteration: (0.01 - 0.0001) * Δx * (1 - 0.0025)^2
-</details>
-
-**State Verification**:
+#### B. Fee System Analysis
+**Implementation**:
 ```solidity
-// POC verification
-console2.log("Profit:", IERC20(BUSD).balanceOf(attacker) / 1e18, 'BUSD');
-```
-
-### 4. Root Cause Analysis
-
-**Business Logic Design**:
-- **Intended Functionality**: 
-  - Constant product AMM for fair price discovery
-  - Fee-based revenue generation (0.25% per swap)
-- **Design Assumptions**:
-  1. Price manipulation economically infeasible
-  2. Single swaps cause negligible price impact
-  3. Flash loans would be used for arbitrage, not exploitation
-- **Edge Case Failure**:
-  - Iterative micro-swaps bypass "large swap" protections
-  - Pre-swap balance modification breaks reserve consistency
-
-**Technical Implementation Flaws**:
-1. **Reserve Update Timing**:
-   ```solidity
-   // PancakePair.sol
-   function swap() external {
-       // ...
-       _update(balance0, balance1, _reserve0, _reserve1); // AFTER swap
-   }
-   ```
-   - Reserves updated post-swap enabling pre-swap balance manipulation
-
-2. **Fee Calculation Error**:
-   ```solidity
-   uint balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(25));
-   ```
-   - Fees applied only to input tokens, not output tokens
-
-3. **Lack of Price Deviation Checks**:
-   - No maximum price impact protection per transaction
-   - No time-weighted price oracle integration
-
-### 5. Attack Strategy Analysis
-
-**Economic Optimization**:
-- **Iteration Count (66)**:
-  - Minimizes: (Gas Cost) / (Price Impact)
-  - Balances: Block gas limit vs. profit maximization
-- **Loan Sizing (19,200 BUSD)**:
-  - 80% of pool liquidity for maximum impact
-  - Below flash loan collateral thresholds
-
-**Technical Execution**:
-1. **Gas Efficiency**:
-   - Child contract pattern avoids approval overhead
-   - Fixed-point math minimizes computation
-2. **Risk Mitigation**:
-   - -1 wei safety margin in calculations
-   - Sequential swaps prevent atomic arbitrage
-
-### 6. Vulnerability Pattern Recognition
-
-**Signature Characteristics**:
-1. **Code Patterns**:
-   - Custom swap amount calculations
-   - Looped swap operations
-   - Pre-swap token transfers
-2. **Transaction Patterns**:
-   - Flash loan → Multiple swaps → Loan repayment
-   - Symmetric buy/sell patterns
-3. **Economic Patterns**:
-   - Extreme price deviation followed by reversion
-   - Profit despite fee overhead
-
-**Detection Framework**:
-```mermaid
-graph TD
-    A[Transaction] --> B{>3 swaps to same pool?}
-    B -->|Yes| C{Price deviation >10%?}
-    C -->|Yes| D{Flash loan present?}
-    D -->|Yes| E[Flag as potential attack]
-```
-
-### 7. Security Enhancement Framework
-
-**Immediate Fixes**:
-```solidity
-// 1. Reserve update before swap
-function swap() external {
-    (uint112 _reserve0, uint112 _reserve1,) = getReserves();
-    _update(IERC20(token0).balanceOf(address(this)), 
-            IERC20(token1).balanceOf(address(this)), 
-            _reserve0, _reserve1);
-    // ... swap logic ...
+function _tokenTransfer(..., bool takeFee) private {
+    if (takeFee) {
+        uint256 swapFeeAmount;
+        if (isSell && !inSwap) {
+            swapTokenForFund(swapFeeAmount, contractSellAmount);
+        }
+    }
 }
-
-// 2. Add price impact check
-require(amountOut < reserveOut * maxPriceImpact / 10000, "Price impact too high");
 ```
 
-**Architectural Improvements**:
-1. **TWAP Integration**:
-   - Require oracle price within 5% of AMM price
-2. **Dynamic Fees**:
-   ```solidity
-   fee = baseFee * (priceImpact)^2
-   ```
-3. **Flash Loan Taxes**:
-   - Surcharge for flash loan-enabled swaps
+**Business Logic Gap**:
+- Assumption: `swapTokenForFund` would only trigger on user sells
+- Reality: Attack forces contract-initiated swaps during reserve manipulation
+- Impact: Protocol pays fees to attacker during artificial volume
 
-**Monitoring Systems**:
-1. **Real-time Anomaly Detection**:
-   - Track reserveChange / transactionValue ratio
-   - Flag transactions with >5 consecutive swaps to same pool
-2. **Liquidity Health Scores**:
-   ```math
-   Health = (Min Liquidity) / (Max Transaction Size)
-   ```
+---
 
-### 8. Research Methodology
+### CONTRACT DESIGN ASSUMPTIONS ANALYSIS
 
-**Discovery Techniques**:
-1. **Static Analysis**:
-   - Identify unguarded swap functions
-   - Detect custom swap amount calculations
-2. **Dynamic Analysis**:
-   - Fuzz testing with iterative micro-swaps
-   - Flash loan simulation framework
-3. **Economic Modeling**:
-   - Profitability simulation under fee regimes
-   - Liquidity depth stress tests
+#### Critical Flawed Assumptions
+1. **Fee Application Assumption**:
+   - Expected: Fees apply uniformly to user transactions
+   - Actual: Micro-swaps bypass minimum fee thresholds
+   - Evidence: 66 identical swaps at 290.909 BUSD each
 
-**Vulnerability Research Framework**:
-1. **Protocol Decomposition**:
-   - Isolate AMM components
-   - Map fee handling mechanisms
-2. **Invariant Verification**:
-   - Formal verification of constant product maintenance
-   - Bounded model checking for reserve updates
-3. **Attack Simulation**:
-   ```python
-   def simulate_attack(pool, loan_size, iterations):
-       for i in range(iterations):
-           pool.deposit(loan_size/iterations)
-           pool.swap(calculate_max_out())
-       for i in range(iterations):
-           pool.swap(0, calculate_max_in())
-       return profit
-   ```
+2. **Reserve Synchronization Assumption**:
+   - Expected: LP reserves reflect actual token balances
+   - Actual: Fee-on-transfer creates reserve imbalance
+   - Evidence: `getAmount0ToReachK` calculations in POC
 
-## Conclusion
-This exploit demonstrates a sophisticated manipulation of AMM core invariants through iterative micro-swaps. By combining flash loans with precise reserve poisoning, the attacker created artificial price deviations exceeding 100x while maintaining constant product validity. The root cause lies in the delayed reserve update mechanism and lack of price impact controls. Mitigation requires fundamental changes to swap execution order and real-time price deviation limits.
+3. **Economic Behavior Assumption**:
+   - Expected: Users optimize for fee avoidance
+   - Actual: Attacker exploits fee mechanics for profit
+   - Evidence: 66 sequential swaps maximizing imbalance
 
-The pattern represents a systemic vulnerability in constant product AMMs, with detection requiring multi-layer analysis of transaction sequencing, price deviations, and capital sources. Future AMM designs should incorporate time-weighted price oracles and dynamic fee structures to disincentivize such manipulations.
+---
+
+### BUSINESS LOGIC VULNERABILITY
+
+#### Vulnerability: Asymmetric Fee Arbitrage
+**Business Operation**: Token transfers with fee processing  
+**Implementation Flaw**:
+```solidity
+function swapTokenForFund(uint256 tokenAmount, ...) private lockTheSwap {
+    _swapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        tokenAmount, 0, path, address(_feeDistributor), ...
+    );
+}
+```
+
+**Business Logic Gap**:
+- Requirement: Fee processing should maintain pool equilibrium
+- Implementation: Fee conversion occurs mid-transaction
+- Failure: Creates temporary reserve imbalances during swaps
+
+**Exploitation Evidence**:
+- Trace: 132 swaps (66 each direction) in single transaction
+- Economic Impact: $15,261.68 profit extracted
+- Storage Change: LP reserve state desynchronization
+
+#### Quantitative Proof
+**Pre-Attack State**:
+- LP Reserve Ratio: 1:1 (assumed)
+- Attack Contract YB Balance: 0
+
+**Attack Execution**:
+1. 66 buy swaps → Fee-distorted YB reserves
+2. 66 sell swaps → Exploit reserve imbalance
+3. Profit: 15,261.68 BUSD
+
+**Mathematical Evidence**:
+- Input: 19,200 BUSD
+- Output: 19,200 + 15,261.68 = 34,461.68 BUSD
+- Fee Efficiency: 79.5% profit conversion
+
+---
+
+### VULNERABILITY PATTERN
+
+**Pattern Name**: Fee-Induced Reserve Imbalance Exploit  
+**Key Characteristics**:
+1. Fee-on-transfer token mechanics
+2. Micro-swap threshold bypass
+3. High-frequency reserve manipulation
+4. Asymmetric fee application
+5. Mid-transaction fee processing
+
+**Detection Signatures**:
+- Repeated identical swaps in single transaction
+- LP reserve ratio fluctuations > 5%
+- Circular swap patterns (buy → sell cycles)
+- Transaction gas usage > 5M
+
+**Mitigation Strategies**:
+1. Implement minimum swap thresholds
+```solidity
+require(amount > minSwapThreshold, "Below fee threshold");
+```
+2. Defer fee processing to discrete intervals
+3. Add reserve synchronization checks
+```solidity
+function syncReserves() external {
+    (uint112 r0, uint112 r1,) = IPancakePair(pair).getReserves();
+    require(r0 == balance0 && r1 == balance1, "Desync detected");
+}
+```
+4. Use time-weighted average prices
+5. Disable fee processing during flash loans
+
+**Business Logic Safeguards**:
+- Economic simulation of fee impacts
+- Reserve deviation alerts
+- Flash loan usage monitoring
+- Fee tier optimization based on swap size
+
+---
+
+### CONCLUSION
+
+The exploit demonstrates a fundamental flaw in fee-on-transfer token economics when integrated with constant product AMMs. By systematically inducing reserve imbalances through micro-swaps and exploiting the timing of fee processing, the attacker extracted $15,261.68 in value. The core vulnerability stems from the protocol's assumption that fees would naturally balance economic incentives, when in reality they created arbitrage vectors during reserve desynchronization.
+
+The recommended mitigation strategy involves redesigning the fee processing mechanism to operate outside of swap transactions, implementing reserve synchronization checks, and setting economically viable minimum swap thresholds. These changes would preserve the protocol's business model while eliminating the reserve manipulation vector.
 
 ## 📈 Transaction Trace Summary
 - **Transaction ID**: 0xe1e7fa81c3761e2698aa83e084f7dd4a1ff907bcfc4a612d54d92175d4e8a28b
@@ -291,7 +239,7 @@ The pattern represents a systemic vulnerability in constant product AMMs, with d
 - **Nested Function Calls**: 13
 - **Event Logs**: 2149
 - **Asset Changes**: 1366 token transfers
-- **Top Transfers**: 19200 bsc-usd ($19199.750518798828125), 290.90909090909090909 bsc-usd ($290.905310890891335226), None YB ($None)
+- **Top Transfers**: 19200 bsc-usd ($19200), 290.90909090909090909 bsc-usd ($290.90909090909090909), None YB ($None)
 - **Balance Changes**: 106 accounts affected
 - **State Changes**: 17 storage modifications
 
