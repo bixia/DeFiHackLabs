@@ -29,8 +29,8 @@ DEEPSEEK_API_KEY = "sk-34b54effa6154e99b20833809ea77945"
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
 
 # Model Configuration
-# USE_REASONING_MODEL = True  # Set to True to use DeepSeek R1, False for regular deepseek-chat
-USE_REASONING_MODEL = False  # Set to True to use DeepSeek R1, False for regular deepseek-chat
+USE_REASONING_MODEL = True  # Set to True to use DeepSeek R1, False for regular deepseek-chat
+# USE_REASONING_MODEL = False  # Set to True to use DeepSeek R1, False for regular deepseek-chat
 REASONING_MODEL_NAME = "deepseek-reasoner"  # DeepSeek-R1-0528 reasoning model
 REGULAR_MODEL_NAME = "deepseek-chat"  # DeepSeek-V3-0324 regular model
 
@@ -457,140 +457,212 @@ Your goal is to produce analysis that serves as a reference for finding and prev
 ## Transaction Trace Data
 {self._format_trace_for_analysis(trace_data)}
 
-## Deep Analysis Requirements
+## ENHANCED Deep Analysis Requirements
 
-Please provide an extremely detailed technical analysis that combines the CONTRACT SOURCE CODE, POC CODE, and TRANSACTION TRACE DATA. This is a comprehensive analysis that must deeply examine the actual vulnerable contract implementation.
+This analysis must provide COMPREHENSIVE technical depth that addresses common gaps in vulnerability reports:
 
-### 1. **Vulnerability Summary**
-- Brief description of the main vulnerability type
-- Classification (e.g., reentrancy, price manipulation, logic flaw, etc.)
-- Identify the exact vulnerable function(s) in the contract source code
+### 🔥 CRITICAL ANALYSIS REQUIREMENTS:
 
-### 2. **Step-by-Step Exploit Analysis (EXTREMELY DETAILED)**
-**Critical Requirements:**
-- For each step, you MUST reference the actual contract source code (not just POC)
-- Correlate each step with specific function calls from the trace data
-- Reference specific lines/functions in BOTH the vulnerable contract AND the POC code
-- Explain exactly what happens at the EVM/Solidity level
-- Show how each function call modifies contract state
-- Trace the exact flow of funds through the contracts
-- Include gas consumption and why certain operations succeed/fail
+**1. MATHEMATICAL/ECONOMIC MECHANISM ANALYSIS (MANDATORY)**
+You MUST provide detailed mathematical analysis of the core exploit mechanism:
+- If it's price manipulation: Explain the mathematical relationship between inputs and price changes
+- If it's fee/reward exploitation: Show the mathematical advantage gained through the attack
+- If it's logic flaw: Demonstrate the mathematical inconsistency that enables profit
+- If it's reentrancy: Analyze the state changes and invariant violations
+- For any economic attack: Provide profit calculation formulas and optimization strategy
 
-**Mandatory Format for Each Step:**
+**2. BUSINESS LOGIC & DESIGN INTENTION ANALYSIS (MANDATORY)**
+You MUST analyze the vulnerable contract's business logic:
+- What business problem was the protocol trying to solve?
+- What assumptions did developers make about user behavior?
+- How was the system supposed to work under normal conditions?
+- What edge cases or attack vectors were not considered?
+- Why did the specific implementation choices create vulnerabilities?
+
+**3. ATTACK STRATEGY OPTIMIZATION ANALYSIS (MANDATORY)**
+You MUST explain the attacker's strategic choices:
+- Why were specific parameter values chosen (amounts, iterations, timing)?
+- How did the attacker optimize for maximum profit vs. minimum risk?
+- What constraints (gas, liquidity, fees) influenced the attack design?
+- Could the attack be executed differently for better results?
+
+### 1. **Vulnerability Classification & Summary**
+- Precise vulnerability type classification
+- Primary and secondary attack vectors involved
+- Affected contract components and functions
+
+### 2. **Mathematical Foundation Analysis (MANDATORY)**
+**Provide mathematical analysis appropriate to the vulnerability type:**
+
+**For Price Manipulation Attacks:**
 ```
-Step X: [Detailed Description]
-- Trace Evidence: [Exact function call signature, input data, output from trace]
-- Contract Code Reference: [Specific function name, line numbers, and code snippet from vulnerable contract]
+- Initial state equations and invariants
+- Price impact calculations and formulas
+- Slippage and arbitrage opportunity quantification
+- Multi-step price manipulation mathematics
+```
+
+**For Logic Flaw Exploits:**
+```
+- State transition analysis
+- Invariant violation mathematics
+- Condition bypass calculations
+- Edge case mathematical analysis
+```
+
+**For Reentrancy Attacks:**
+```
+- Call stack analysis
+- State inconsistency mathematics
+- Balance manipulation calculations
+- Guard bypass mechanics
+```
+
+**For Economic Exploits:**
+```
+- Reward/penalty calculation formulas
+- Economic incentive misalignment analysis
+- Profit optimization mathematics
+- Risk/reward calculations
+```
+
+### 3. **Step-by-Step Exploit Analysis (EXTREMELY DETAILED)**
+
+**Pre-Attack Setup Analysis:**
+- Initial conditions that enabled the attack
+- Resource requirements and constraints
+- Strategic parameter selection rationale
+
+**Mandatory Format for Each Critical Step:**
+```
+Step X: [Descriptive Title with Mathematical Context]
+- Mathematical State: [Precise numerical values, ratios, calculations]
+- Contract Code Reference: [Exact function, parameters, state changes]
 - POC Code Reference: [How the POC triggers this step]
-- EVM State Changes: [Exact storage/memory changes]
-- Fund Flow: [How tokens/ETH move between addresses]
-- Technical Mechanism: [Why this step works at the blockchain level]
-- Vulnerability Exploitation: [How this step exploits the bug]
+- Technical Mechanism: [Why this specific action succeeds]
+- Business Logic Impact: [How this violates intended behavior]
+- Profit/Damage Calculation: [Quantified impact of this step]
+- State Verification: [Proof that attack conditions are met]
 ```
 
-**Additional Requirements:**
-- Analyze AT LEAST 10-15 detailed steps
-- For each asset transfer in the trace, explain the contract logic that enabled it
-- Cross-reference function calls in trace with actual contract functions
-- Explain how the POC manipulates the vulnerable contract's state
+**Required Analysis Depth:**
+- Exact mathematical calculations for key steps
+- Precise state changes with before/after values
+- Gas optimization and economic efficiency analysis
+- Alternative attack paths and why they weren't chosen
 
-### 3. **Root Cause Deep Dive (Contract Source Code Analysis)**
-**Requirements:**
-- Quote the EXACT vulnerable code from the contract source code (function names, line numbers)
-- Explain the specific implementation flaw in the contract code
-- Show line-by-line how the vulnerability manifests in the source code
-- Compare vulnerable code patterns with secure implementations
-- Include assembly/Yul code analysis where relevant
-- Demonstrate how the contract's state management is flawed
+### 4. **Root Cause Analysis (Contract Implementation Deep Dive)**
 
-**Format:**
+**A. Business Logic Design Analysis:**
 ```
-Vulnerable Code Location: [Contract file name, function name, approximate line numbers]
-Code Snippet:
-[Exact vulnerable code from source]
+Intended Functionality: [What was the system supposed to do?]
+Design Assumptions: [What did developers assume about usage?]
+Edge Case Handling: [What scenarios were not considered?]
+Economic Model: [What incentive structure was intended?]
 
-Flaw Analysis:
-- [What's wrong with this code]
-- [Why the implementation is insecure]
-- [What the developer missed or did incorrectly]
-
-Exploitation Mechanism:
-- [How the POC manipulates this code]
-- [What inputs/conditions trigger the vulnerability]
+Implementation Analysis:
+- Quote exact vulnerable code with line-by-line analysis
+- Explain why the implementation fails under attack conditions
+- Show how business assumptions translated to vulnerable code
+- Demonstrate the gap between intention and implementation
 ```
 
-### 4. **Technical Exploit Mechanics**
-- Detailed explanation of why each attack step succeeds
-- How the attacker bypassed security mechanisms
-- Mathematical/cryptographic principles involved (if any)
-- Memory/storage manipulation techniques used
-
-### 5. **Bug Pattern Identification**
-**Provide a reusable bug pattern template:**
+**B. Technical Implementation Flaws:**
 ```
-Bug Pattern: [Name]
-Description: [What this vulnerability pattern looks like]
-Code Characteristics:
-- [Specific code patterns to look for]
-- [Common implementation mistakes]
-- [Dangerous function combinations]
-
-Detection Methods:
-- [Static analysis techniques]
-- [Code review checklist items]
-- [Automated tools that can catch this]
-
-Variants:
-- [Different ways this bug can manifest]
-- [Related vulnerability patterns]
+Code Vulnerability Analysis:
+- Specific functions and their flaws
+- Missing checks, validations, or constraints
+- Improper state management or access controls
+- Timing issues or race conditions
+- Mathematical precision or overflow issues
 ```
 
-### 6. **Vulnerability Detection Guide**
-**How to find similar vulnerabilities:**
-- Specific code patterns to search for in other projects
-- Static analysis rules that would catch this bug type
-- Manual code review techniques
-- Testing strategies to uncover similar flaws
-- Tools and queries for large-scale detection
+### 5. **Attack Strategy Analysis**
 
-### 7. **Impact Assessment**
-- Precise financial impact calculation
-- Technical impact on protocol functionality
-- Potential for similar attacks on other protocols
+**Economic Optimization:**
+- How the attacker maximized profit while minimizing cost and risk
+- Resource allocation strategy (gas, capital, time)
+- Why specific attack parameters were chosen
 
-### 8. **Advanced Mitigation Strategies**
-- Immediate fixes with code examples
-- Long-term architectural improvements
-- Defense-in-depth strategies
-- Monitoring and detection systems
+**Technical Execution:**
+- Sequence optimization and timing considerations
+- Gas efficiency and cost management
+- Risk mitigation strategies employed
 
-### 9. **Lessons for Security Researchers**
-- How this vulnerability type can be discovered
-- Research methodologies that would uncover similar issues
-- Red flags during code review
-- Testing approaches for this bug class
+### 6. **Comprehensive Vulnerability Pattern Recognition**
 
-## Critical Requirements:
-1. **MANDATORY Source Code Analysis**: You MUST extensively reference and quote from the actual contract source code. Every technical claim must be backed by specific code snippets from the vulnerable contracts.
+**Pattern Identification:**
+```
+Vulnerability Class: [Generic vulnerability category]
+Technical Characteristics:
+- Code patterns that indicate this vulnerability type
+- Common implementation mistakes that enable this attack
+- Architectural decisions that create this risk
 
-2. **Trace-Code Correlation**: For every function call in the trace data, identify and explain the corresponding function in the contract source code. Show how the trace execution flow maps to the contract logic.
+Business Logic Characteristics:
+- Economic models vulnerable to this attack type
+- Assumptions that are commonly violated
+- Design patterns that enable this exploit class
+```
 
-3. **Detailed Step-by-Step Analysis**: Provide at least 10-15 extremely detailed steps that combine:
-   - Exact trace data (function calls, inputs, outputs)
-   - Specific contract source code being executed
-   - POC code that triggers each step
-   - State changes and fund movements
+**Detection Framework:**
+```
+Static Analysis Signatures:
+- Code patterns to scan for
+- Function combinations that indicate risk
+- Missing validation patterns
 
-4. **Assembly/Yul Analysis**: Since this appears to involve Yul optimization, analyze the relevant assembly code in the contracts and explain how it's exploited.
+Dynamic Analysis Signatures:
+- Transaction patterns that indicate attacks
+- State change patterns to monitor
+- Economic behavior anomalies
+```
 
-5. **Vulnerability Pattern Recognition**: Create a comprehensive bug pattern template that can be used to find similar vulnerabilities in other contracts.
+### 7. **Security Enhancement Framework**
 
-6. **Actionable Detection Methods**: Provide specific, implementable techniques for finding similar bugs, including:
-   - Exact code patterns to search for
-   - Static analysis rules
-   - Manual review techniques
+**Immediate Technical Fixes:**
+- Specific code changes with examples
+- Additional validations and constraints
+- State management improvements
 
-**IMPORTANT**: This analysis must be a comprehensive technical deep-dive that serves as a definitive reference for understanding this vulnerability class. Do not provide superficial analysis - every claim must be backed by specific code references and trace evidence.
+**Architectural Improvements:**
+- Design pattern changes to prevent this vulnerability class
+- Economic model adjustments
+- Access control and permission model updates
+
+**Monitoring and Detection:**
+- Real-time attack detection mechanisms
+- Economic anomaly detection systems
+- State invariant monitoring
+
+### 8. **Research Methodology for Similar Vulnerabilities**
+
+**Discovery Techniques:**
+- Code analysis approaches for finding similar issues
+- Economic model analysis for vulnerability discovery
+- Testing methodologies for edge case identification
+
+**Vulnerability Research Framework:**
+- Systematic approaches for analyzing similar protocols
+- Pattern recognition techniques for vulnerability classes
+- Automated tools and manual analysis combinations
+
+## CRITICAL SUCCESS CRITERIA:
+
+1. **Mathematical Precision**: All claims must be backed by precise calculations and formulas
+2. **Business Context Understanding**: Must explain the intended functionality and why it failed
+3. **Attack Strategy Analysis**: Must explain the attacker's optimization strategy and parameter choices
+4. **Code-Math-Business Correlation**: Every technical claim must connect code implementation to business logic to mathematical exploitation
+5. **Generalizability**: Analysis must provide insights applicable to similar vulnerability classes
+
+**UNIVERSAL REQUIREMENTS:**
+- Precise mathematical analysis appropriate to the vulnerability type
+- Deep understanding of business logic and design intentions
+- Comprehensive attack strategy analysis
+- Actionable vulnerability detection and prevention strategies
+- Clear correlation between contract code, business logic, and exploitation mechanics
+
+This analysis must serve as a comprehensive reference for understanding this specific vulnerability and similar vulnerability classes. Focus on providing insights that help security researchers identify and prevent similar issues across different protocols.
         """
         return prompt
     
