@@ -19,14 +19,24 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configuration
 TENDERLY_BASE_URL = "https://api.tenderly.co/api/v1/public-contract"
-TENDERLY_AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoiNTY3YWQ1ZTEtYzUxNi00NWI1LWI5YmYtZDQ1MWFhYzYzZGMzIiwic2Vzc2lvbl9ub25jZSI6NiwidmFsaWRfdG8iOjE3NDM4NDE2NjV9.9pR6SJomb9vk6c70wSRvBB5t3SdYext9h-hE0X2Eo2g"
+TENDERLY_AUTH_TOKEN = os.getenv('TENDERLY_AUTH_TOKEN')
 
 # DeepSeek Configuration
-DEEPSEEK_API_KEY = "sk-34b54effa6154e99b20833809ea77945"
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
+
+# Validate API keys are loaded
+if not DEEPSEEK_API_KEY:
+    raise ValueError("DEEPSEEK_API_KEY not found in environment variables. Please check your .env file.")
+if not TENDERLY_AUTH_TOKEN:
+    raise ValueError("TENDERLY_AUTH_TOKEN not found in environment variables. Please check your .env file.")
 
 # Model Configuration
 USE_REASONING_MODEL = True  # Set to True to use DeepSeek R1, False for regular deepseek-chat
@@ -457,212 +467,258 @@ Your goal is to produce analysis that serves as a reference for finding and prev
 ## Transaction Trace Data
 {self._format_trace_for_analysis(trace_data)}
 
-## ENHANCED Deep Analysis Requirements
+## CRITICAL STEP 1: IDENTIFY THE VULNERABLE CONTRACT
 
-This analysis must provide COMPREHENSIVE technical depth that addresses common gaps in vulnerability reports:
+**MANDATORY FIRST TASK**: You MUST correctly identify which contract contains the core vulnerability based on:
 
-### 🔥 CRITICAL ANALYSIS REQUIREMENTS:
+1. **Project Name Analysis**: The project name "{tx_info.get('project_name', 'Unknown')}" indicates the main vulnerable contract
+2. **File Naming Convention**: Look for contracts whose names match or relate to the project name
+3. **POC Analysis**: Examine which contract the POC is primarily targeting/exploiting
+4. **Transaction Flow**: Identify which contract's functions are being manipulated
 
-**1. MATHEMATICAL/ECONOMIC MECHANISM ANALYSIS (MANDATORY)**
-You MUST provide detailed mathematical analysis of the core exploit mechanism:
-- If it's price manipulation: Explain the mathematical relationship between inputs and price changes
-- If it's fee/reward exploitation: Show the mathematical advantage gained through the attack
-- If it's logic flaw: Demonstrate the mathematical inconsistency that enables profit
-- If it's reentrancy: Analyze the state changes and invariant violations
-- For any economic attack: Provide profit calculation formulas and optimization strategy
+**VULNERABLE CONTRACT IDENTIFICATION CRITERIA:**
+- If project name is "XYZToken_exp" → Focus on XYZ Token contract
+- If project name mentions a specific protocol → Focus on that protocol's main contract  
+- If project name is generic → Analyze POC to determine the main target contract
 
-**2. BUSINESS LOGIC & DESIGN INTENTION ANALYSIS (MANDATORY)**
-You MUST analyze the vulnerable contract's business logic:
-- What business problem was the protocol trying to solve?
-- What assumptions did developers make about user behavior?
-- How was the system supposed to work under normal conditions?
-- What edge cases or attack vectors were not considered?
-- Why did the specific implementation choices create vulnerabilities?
-
-**3. ATTACK STRATEGY OPTIMIZATION ANALYSIS (MANDATORY)**
-You MUST explain the attacker's strategic choices:
-- Why were specific parameter values chosen (amounts, iterations, timing)?
-- How did the attacker optimize for maximum profit vs. minimum risk?
-- What constraints (gas, liquidity, fees) influenced the attack design?
-- Could the attack be executed differently for better results?
-
-### 1. **Vulnerability Classification & Summary**
-- Precise vulnerability type classification
-- Primary and secondary attack vectors involved
-- Affected contract components and functions
-
-### 2. **Mathematical Foundation Analysis (MANDATORY)**
-**Provide mathematical analysis appropriate to the vulnerability type:**
-
-**For Price Manipulation Attacks:**
+**OUTPUT REQUIRED:**
 ```
-- Initial state equations and invariants
-- Price impact calculations and formulas
-- Slippage and arbitrage opportunity quantification
-- Multi-step price manipulation mathematics
+PRIMARY VULNERABLE CONTRACT: [Contract Name and Address]
+REASONING: [Why this contract is the main vulnerability source]
+BUSINESS LOGIC TO ANALYZE: [What business operations of this contract will be examined]
 ```
 
-**For Logic Flaw Exploits:**
-```
-- State transition analysis
-- Invariant violation mathematics
-- Condition bypass calculations
-- Edge case mathematical analysis
-```
+## CRITICAL STEP 2: TRACE-DRIVEN VULNERABILITY ANALYSIS
 
-**For Reentrancy Attacks:**
-```
-- Call stack analysis
-- State inconsistency mathematics
-- Balance manipulation calculations
-- Guard bypass mechanics
-```
+**MANDATORY: Every claim must be backed by specific trace evidence**
 
-**For Economic Exploits:**
-```
-- Reward/penalty calculation formulas
-- Economic incentive misalignment analysis
-- Profit optimization mathematics
-- Risk/reward calculations
-```
+### 🔍 TRACE DATA INTEGRATION REQUIREMENTS:
 
-### 3. **Step-by-Step Exploit Analysis (EXTREMELY DETAILED)**
+**1. STEP-BY-STEP TRACE ANALYSIS (CRITICAL)**
+You MUST analyze the attack flow using the actual transaction trace data:
 
-**Pre-Attack Setup Analysis:**
-- Initial conditions that enabled the attack
-- Resource requirements and constraints
-- Strategic parameter selection rationale
-
-**Mandatory Format for Each Critical Step:**
+**A. Asset Movement Proof:**
+For each critical step, provide:
 ```
-Step X: [Descriptive Title with Mathematical Context]
-- Mathematical State: [Precise numerical values, ratios, calculations]
-- Contract Code Reference: [Exact function, parameters, state changes]
-- POC Code Reference: [How the POC triggers this step]
-- Technical Mechanism: [Why this specific action succeeds]
-- Business Logic Impact: [How this violates intended behavior]
-- Profit/Damage Calculation: [Quantified impact of this step]
-- State Verification: [Proof that attack conditions are met]
+Step X: [Attack Step Description]
+Trace Evidence:
+- Asset Transfer: [Specific transfer from asset_changes: Token X, Amount Y, From Z to W]
+- Function Call: [Exact function called from function_calls with parameters]
+- Gas Used: [Gas consumption for this operation]
+- Storage Changes: [State modifications from state_diff]
+- Event Logs: [Relevant events from logs that prove this step occurred]
+
+Business Logic Violation:
+- Expected Behavior: [What should have happened according to contract design]
+- Actual Behavior: [What actually happened according to trace]
+- Evidence of Failure: [Specific trace data showing business logic breakdown]
 ```
 
-**Required Analysis Depth:**
-- Exact mathematical calculations for key steps
-- Precise state changes with before/after values
-- Gas optimization and economic efficiency analysis
-- Alternative attack paths and why they weren't chosen
-
-### 4. **Root Cause Analysis (Contract Implementation Deep Dive)**
-
-**A. Business Logic Design Analysis:**
+**B. Quantitative Vulnerability Proof:**
 ```
-Intended Functionality: [What was the system supposed to do?]
-Design Assumptions: [What did developers assume about usage?]
-Edge Case Handling: [What scenarios were not considered?]
-Economic Model: [What incentive structure was intended?]
+Pre-Attack State:
+- Token Balances: [From balance_changes data]
+- LP Reserves: [From trace or asset_changes]
+- Contract State: [From state_diff]
 
-Implementation Analysis:
-- Quote exact vulnerable code with line-by-line analysis
-- Explain why the implementation fails under attack conditions
-- Show how business assumptions translated to vulnerable code
-- Demonstrate the gap between intention and implementation
+Attack Execution:
+- Manipulation Steps: [Each step with trace evidence]
+- State Changes: [Exact storage modifications]
+- Balance Deltas: [Precise balance changes from trace]
+
+Post-Attack State:
+- Profit Calculation: [Exact amounts from asset_changes]
+- Contract Damage: [State corruption evidence from trace]
+- Victim Losses: [Balance reductions from balance_changes]
 ```
 
-**B. Technical Implementation Flaws:**
+### 🎯 MANDATORY ANALYSIS REQUIREMENTS:
+
+**1. VULNERABLE CONTRACT BUSINESS MODEL ANALYSIS (CRITICAL)**
+
+**A. Core Business Purpose & Economics:**
+- What specific business problem does this contract solve?
+- What is the intended revenue generation mechanism?
+- How does the fee structure serve the business model?
+- What user behavior was the contract designed to incentivize?
+
+**B. Token Economics Deep Dive (If Token Contract):**
 ```
-Code Vulnerability Analysis:
-- Specific functions and their flaws
-- Missing checks, validations, or constraints
-- Improper state management or access controls
-- Timing issues or race conditions
-- Mathematical precision or overflow issues
-```
-
-### 5. **Attack Strategy Analysis**
-
-**Economic Optimization:**
-- How the attacker maximized profit while minimizing cost and risk
-- Resource allocation strategy (gas, capital, time)
-- Why specific attack parameters were chosen
-
-**Technical Execution:**
-- Sequence optimization and timing considerations
-- Gas efficiency and cost management
-- Risk mitigation strategies employed
-
-### 6. **Comprehensive Vulnerability Pattern Recognition**
-
-**Pattern Identification:**
-```
-Vulnerability Class: [Generic vulnerability category]
-Technical Characteristics:
-- Code patterns that indicate this vulnerability type
-- Common implementation mistakes that enable this attack
-- Architectural decisions that create this risk
-
-Business Logic Characteristics:
-- Economic models vulnerable to this attack type
-- Assumptions that are commonly violated
-- Design patterns that enable this exploit class
+From the vulnerable contract source code, analyze:
+- Token Purpose: [What is this token designed for?]
+- Fee Structure: [What fees are charged and why?]
+- Transfer Logic: [How do transfers work differently from standard ERC20?]
+- Special Functions: [What unique business operations does this token enable?]
+- Reward/Penalty Mechanisms: [How does the token incentivize/discourage behavior?]
+- Business Value Proposition: [What benefit do users get from this token?]
 ```
 
-**Detection Framework:**
+**C. Access Control & Business Permissions:**
 ```
-Static Analysis Signatures:
-- Code patterns to scan for
-- Function combinations that indicate risk
-- Missing validation patterns
-
-Dynamic Analysis Signatures:
-- Transaction patterns that indicate attacks
-- State change patterns to monitor
-- Economic behavior anomalies
+- Owner/Admin Functions: [What special business privileges exist?]
+- User Role Categories: [How are different user types treated in the business model?]
+- Function Restrictions: [What business limitations exist on operations?]
+- Business Rationale: [Why were these restrictions implemented from a business perspective?]
 ```
 
-### 7. **Security Enhancement Framework**
+**2. CONTRACT DESIGN ASSUMPTIONS ANALYSIS (CRITICAL)**
 
-**Immediate Technical Fixes:**
-- Specific code changes with examples
-- Additional validations and constraints
-- State management improvements
+**A. Developer Business Intent Analysis:**
+```
+For each major function in the vulnerable contract:
+Function: [name]
+Business Intent: [What business operation was this supposed to enable?]
+Expected Usage: [How did developers expect users to interact with this?]
+Design Assumptions: [What did developers assume about usage patterns?]
+Economic Logic: [How does this function contribute to the business model?]
+```
 
-**Architectural Improvements:**
-- Design pattern changes to prevent this vulnerability class
-- Economic model adjustments
-- Access control and permission model updates
+**B. Business Model Assumptions:**
+- What user behavior did the economic model assume?
+- What market conditions was the contract optimized for?
+- What competitive advantages was the business model supposed to provide?
+- What business risks were considered vs. overlooked?
 
-**Monitoring and Detection:**
-- Real-time attack detection mechanisms
-- Economic anomaly detection systems
-- State invariant monitoring
+**3. BUSINESS LOGIC VULNERABILITY IDENTIFICATION (CRITICAL)**
 
-### 8. **Research Methodology for Similar Vulnerabilities**
+**A. Business Logic Flaw Analysis:**
+```
+For the identified vulnerable functions:
+- Business Operation: [What business function does this enable?]
+- Implementation Logic: [How is this business operation coded?]
+- Business Logic Gap: [Where does the implementation fail to match business intent?]
+- Exploitation Opportunity: [How can this gap be exploited?]
+- Economic Impact: [How does this affect the contract's economic model?]
+- Trace Evidence: [Specific trace data proving this business logic failure]
+```
 
-**Discovery Techniques:**
-- Code analysis approaches for finding similar issues
-- Economic model analysis for vulnerability discovery
-- Testing methodologies for edge case identification
+**B. Fee/Incentive System Business Analysis:**
+```
+- Fee Calculation Logic: [Exact implementation from source code]
+- Business Rationale: [Why were fees structured this way?]
+- Economic Behavior Design: [What behavior was this supposed to encourage?]
+- Edge Case Handling: [How do fees behave under unusual business conditions?]
+- Exploitation Vector: [How can fee logic be manipulated?]
+- Trace Proof: [Evidence from trace showing fee system exploitation]
+```
 
-**Vulnerability Research Framework:**
-- Systematic approaches for analyzing similar protocols
-- Pattern recognition techniques for vulnerability classes
-- Automated tools and manual analysis combinations
+**4. BUSINESS LOGIC EXPLOITATION EVIDENCE (TRACE-BACKED)**
+
+**A. Business Model Breakdown Analysis:**
+```
+Business Assumption 1: [What did developers assume about how this contract would be used?]
+Trace Evidence: [Specific trace data showing assumption violation]
+Reality: [How does the attack violate this assumption?]
+Business Impact: [Why does this assumption failure break the business model?]
+
+Business Assumption 2: [What did developers assume about user economic behavior?]
+Trace Evidence: [Trace data proving different behavior]
+Reality: [How does the attacker behave differently?]
+Business Impact: [How does this threaten the contract's intended function?]
+```
+
+**B. Economic Model Manipulation Evidence:**
+```
+Intended Economic Behavior: [What economic behavior was the contract designed to encourage?]
+Actual Economic Exploitation: [How does the attack create unintended economic opportunities?]
+Trace Evidence: [Specific asset_changes and function_calls proving manipulation]
+Business Model Breakdown: [How does this exploitation undermine the business model?]
+Quantified Impact: [Exact damage to business model from trace data]
+```
+
+### 1. **Vulnerable Contract Business Analysis (Trace-Driven)**
+
+**MANDATORY: Use trace data to understand actual vs intended business operations**
+
+**A. Trace-Revealed Business Model Failures:**
+```
+From trace function_calls, identify:
+- Which contract functions were called most frequently?
+- What were the intended business purposes of these functions?
+- How did the actual usage (from trace) differ from intended usage?
+- What business assumptions were violated by the attack sequence?
+
+Evidence Required:
+- Function call frequency analysis from trace
+- Parameter patterns that reveal business model misuse
+- State change patterns that show business logic failures
+- Asset flow patterns that violate economic design
+```
+
+**B. Business Economics vs. Actual Execution:**
+```
+Business Revenue Model: [How was the contract supposed to make money?]
+Trace Evidence: [Function calls related to revenue generation]
+Revenue Model Failure: [How did the attack break revenue generation?]
+Economic Logic Breakdown: [Why did the business economics fail?]
+```
+
+### 2. **Contract Implementation Business Logic Analysis (Trace-Proven)**
+
+**Focus on proving business logic vulnerabilities using specific trace evidence**
+
+**A. Code-Trace-Business Correlation Analysis:**
+For each vulnerable function identified:
+```
+Function: [name from contract source]
+Business Purpose: [What business operation does this enable?]
+Intended Business Behavior: [from source code analysis]
+Actual Execution: [proven by trace data]
+
+Business Logic Implementation Gap:
+- Business Requirement: [What the business needed]
+- Code Implementation: [How it was coded]
+- Execution Reality: [What trace shows happened]
+- Business Failure Point: [Where business logic broke down]
+
+Trace Evidence of Business Logic Malfunction:
+- Function Calls: [Specific calls to this function from trace]
+- Business Parameters: [Business-relevant parameters used during attack]
+- Business State Changes: [Storage modifications that prove business logic failure]
+- Economic Flows: [Token movements that reveal business model breakdown]
+- Business Impact: [Quantified damage to business model from trace data]
+```
+
+**C. Business vs. Technical Implementation Analysis:**
+```
+Business Requirement: [What the business logic was supposed to achieve]
+Technical Implementation: [How developers coded the business logic]
+Implementation Gap: [Where technical implementation failed business requirements]
+Trace Evidence: [Specific trace data proving the gap]
+Attack Exploitation: [How attackers exploited the business-technical gap]
+```
 
 ## CRITICAL SUCCESS CRITERIA:
 
-1. **Mathematical Precision**: All claims must be backed by precise calculations and formulas
-2. **Business Context Understanding**: Must explain the intended functionality and why it failed
-3. **Attack Strategy Analysis**: Must explain the attacker's optimization strategy and parameter choices
-4. **Code-Math-Business Correlation**: Every technical claim must connect code implementation to business logic to mathematical exploitation
-5. **Generalizability**: Analysis must provide insights applicable to similar vulnerability classes
+1. **Trace Integration**: Every major claim must be supported by specific trace data
+2. **Quantitative Evidence**: Use exact numbers from asset_changes, balance_changes, etc.
+3. **Function Call Mapping**: Map each trace function call to vulnerability exploitation
+4. **Step-by-Step Proof**: Show attack progression using sequential trace evidence
+5. **Economic Quantification**: Calculate exact profits/losses from trace data
 
-**UNIVERSAL REQUIREMENTS:**
-- Precise mathematical analysis appropriate to the vulnerability type
-- Deep understanding of business logic and design intentions
-- Comprehensive attack strategy analysis
-- Actionable vulnerability detection and prevention strategies
-- Clear correlation between contract code, business logic, and exploitation mechanics
+**PROHIBITED APPROACHES:**
+- Don't make claims without trace evidence
+- Don't provide generic vulnerability analysis
+- Don't ignore the quantitative data in traces
+- Don't analyze vulnerabilities that aren't proven by trace data
 
-This analysis must serve as a comprehensive reference for understanding this specific vulnerability and similar vulnerability classes. Focus on providing insights that help security researchers identify and prevent similar issues across different protocols.
+**REQUIRED EVIDENCE STANDARDS:**
+1. **Asset Flow Evidence**: Every token movement must be traceable in asset_changes
+2. **Function Call Evidence**: Every claimed function call must exist in function_calls
+3. **State Change Evidence**: Every logic failure must show in state_diff
+4. **Economic Evidence**: Every profit/loss claim must be calculable from trace data
+5. **Temporal Evidence**: Attack sequence must follow trace chronology
+
+**MANDATORY OUTPUT FORMAT:**
+Each section must include:
+```
+CLAIM: [Vulnerability/exploitation claim]
+TRACE EVIDENCE: [Specific data from transaction trace]
+PROOF: [How the trace data proves the claim]
+QUANTIFICATION: [Exact numbers/calculations from trace]
+```
+
+Focus on creating an analysis where every vulnerability claim is irrefutably proven by the transaction trace data.
         """
         return prompt
     
