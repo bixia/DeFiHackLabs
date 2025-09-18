@@ -2,7 +2,7 @@
 
 **Reproduce DeFi hack incidents using Foundry.**
 
-575 incidents included.
+666 incidents included.
 
 Let's make Web3 secure! Join [Discord](https://discord.gg/Fjyngakf3h)
 
@@ -12,6 +12,17 @@ Notion: [101 root cause analysis of past DeFi hacked incidents](https://web3sec.
 
 **Disclaimer:** This content serves solely as a proof of concept showcasing past DeFi hacking incidents. It is strictly intended for educational purposes and should not be interpreted as encouraging or endorsing any form of illegal activities or actual hacking attempts. The provided information is for informational and learning purposes only, and any actions taken based on this content are solely the responsibility of the individual. The usage of this information should adhere to applicable laws, regulations, and ethical standards.
 
+## Table of Contents
+* [Getting Started](#getting-started)
+* [Who Support Us](#who-support-us-defihacklabs-received-grant-from)
+* [Donate Us](#donate-us)
+* [List of Past DeFi Incidents](#list-of-past-defi-incidents)
+* [Transaction debugging tools](#transaction-debugging-tools)
+* [Ethereum Signature Database](#ethereum-signature-database)
+* [Useful tools](#useful-tools)
+* [Hacks Dashboard](#hacks-dashboard)
+* [List of DeFi Hacks & POCs](#list-of-defi-hacks--pocs)
+  
 ## Getting Started
 
 - Follow the [instructions](https://book.getfoundry.sh/getting-started/installation.html) to install [Foundry](https://github.com/foundry-rs/foundry).
@@ -48,20 +59,111 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 - [Giveth](https://giveth.io/donate/defihacklabs)
 
 ## List of Past DeFi Incidents
+[20250830 EverValueCoin](#20250830-evervaluecoin---arbitrage)
+
+[20250831 Hexotic](#20250831-hexotic---incorrect-input-validation)
+
+[20250827 0xf340](#20250827-0xf340---access-control)
+
+[20250823 ABCCApp](#20250823-abccapp---lack-of-access-control)
+
+[20250820 MulticallWithXera](#20250820-multicallwithxera---access-control)
+
+[20250820 0x8d2e](#20250820-0x8d2e---access-control)
+
+[20250816 d3xai](#20250816-d3xai---price-manipulation)
+
+[20250815 PDZ](#20250815-pdz---price-manipulation)
+
+[20250815 SizeCredit](#20250815-sizecredit---access-control)
+
+[20250813 YuliAI](#20250813-yuliai---price-manipulation)
+
+[20250813 coinbase](#20250813-coinbase---misconfiguration)
+
+[20250813 Grizzifi](#20250813-grizzifi---logic-flaw)
+
+[20250812 Bebop](#20250812-bebop---arbitrary-user-input)
+
+[20250811 WXC](#20250811-wxc---incorrect-token-burn-mechanism)
+
+[20250728 SuperRare](#20250728-superrare---access-control)
+
+[20250726 MulticallWithETH](#20250726-MulticallWithETH---arbitrary-call)
+
+[20250724 SWAPPStaking](#20250724-swappstaking---incorrect-reward-calculation)
+
+[20250720 Stepp2p](#20250720-stepp2p---logic-flaw)
+
+[20250716 VDS](#20250716-vds---logic-flaw)
+
+[20250709 GMX](#20250709-gmx---share-price-manipulation)
+
+[20250705 Unverified_54cd](#20250705-unverified_54cd---access-control)
+
+[20250705 RANT](#20250705-rant---logic-flaw)
+
+[20250702 FPC](#20250702-fpc---logic-flaw)
+
+[20250629 Stead](#20250629-stead---access-control)
+
+[20250626 ResupplyFi](#20250626-resupplyfi---share-price-manipulation)
+
+[20250625 Unverified_b5cb](#20250625-unverified_b5cb---access-control)
+
+[20250623 GradientMakerPool](#20250623-gradientmakerpool---price-oracle-manipulation)
+
+[20250620 Gangsterfinance](#20250620-gangsterfinance---incorrect-dividends)
+
+[20250619 BankrollStack](#20250619-bankrollstack---incorrect-dividends-calculation)
+
+[20250619 BankrollNetwork](#20250619-bankrollnetwork---incorrect-dividends-calculation)
+
+[20250617 MetaPool](#20250617-metapool---access-control)
+
+[20250612 AAVEBoost](#20250612-AAVEBoost---logic-flaw)
+
+[20250610 unverified_8490](#20250610-Unverified_8490---access-control)
+
+[20250528 Corkprotocol](#20250528-corkprotocol---access-control)
+
+[20250527 UsualMoney](#20250527-usualmoney---arbitrage)
+
+[20250526 YDT](#20250526-YDT---logic-flaw)
+
+[20250524 RICE](#20250524-rice---lack-of-access-control)
+
+[20250520 IRYSAI](#20250520-irysai---rug-pull)
+
+[20250518 KRC](#20250518-krc---deflationary-token)
+
+[20250514 Unwarp](#20250514-unwarp---lack-of-access-control)
 
 [20250511 MBUToken](#20250511-mbutoken---price-manipulation-not-confirmed)
+
+[20250509 Nalakuvara_LotteryTicket50](#20250509-nalakuvara_lotteryticket50---price-manipulation)
 
 [20250426 Lifeprotocol](#20250426-lifeprotocol---price-manipulation)
 
 [20250426 ImpermaxV3](#20250426-impermaxv3---floashloan)
 
+[20250416 Roar](#20250416-roar---rug-pull)
+
+[20250408 Laundromat](#20250408-laundromat---logic-flaw)
+
+[20250404 AIRWA](#20250404-airwa---access-control)
+
 [20250418 BTNFT](#20250418-btnft---claim-rewards-without-protection)
 
 [20250416 YVToken](#20250416-yvtoken---not-slippage-protection)
 
+[20250411 Unverified 0x6077](#20250411-unverified-0x6077---lack-of-access-control)
+
 [20250330 LeverageSIR](#20250330-leveragesir---storage-slot1-collision)
 
 [20250328 Alkimiya_IO](#20250328-alkimiya_io---unsafecast)
+
+[20200327 YziAIToken](#20250327-yziai---rug-pull)
 
 [20250320 BBXToken](#20250320-bbxtoken---price-manipulation)
 
@@ -71,15 +173,29 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 
 [20250314 H2O](#20250314-h2o---weak-random-mint)
 
+[20250311 DUCKVADER](#20250311-duckvader---free-mint-bug)
+
+[20250307 UNI](#20250307-uni--logic-flaw)
+
+[20250307 SBRToken](#20250307-sbr-token---price-manipulation)
+
 [20250305 1inch Fusion V1 Settlement](#20250305-1inch-fusionv1-settlement---arbitrary-yul-calldata)
 
+[20250304 Pump](#20250304-pump---not-slippage-protection)
+
 [20250223 HegicOptions](#20250223-hegicoptions---business-logic-flaw)
+
+[20250222 Unverified_35bc](#20250222-Unverified_35bc---reentrancy)
 
 [20250221 StepHeroNFTs](#20250221-stepheronfts---reentrancy-on-sell-nft)
 
 [20250221 Bybit](#20250221-bybit---phishing-attack)
 
+[20250215 unverified_d4f1](#20250215-unverified_d4f1---access-control)
+
 [20250211 FourMeme](#20250211-fourmeme---logic-flaw)
+
+[20250208 Peapods Finance](#20250208-peapods-finance---price-manipulation)
 
 [20250123 ODOS](#20250123-odos---invalid-signature-verification)
 
@@ -87,11 +203,17 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 
 [20250118 Paribus](#20250118-paribus---bad-oracle)
 
+[20250114 IdolsNFT](#20250114-idolsnft---logic-flaw)
+
 [20250113 Mosca2](#20250113-mosca2---logic-flaw)
+
+[20250112 Unilend](#20250112-unilend---logic-flaw)
 
 [20250111 RoulettePotV2](#20250111-roulettepotv2---price-manipulation)
 
 [20250110 JPulsepot](#20250110-jpulsepot---logic-flaw)
+
+[20250108 HORS](#20250108-hors---access-control)
 
 [20250108 LPMine](#20250108-lpmine---incorrect-reward-calculation)
 
@@ -107,7 +229,15 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 
 <details> <summary> 2024 </summary>
 
+[20241227 Bizness](past/2024/README.md#20241227-bizness---reentrancy)
+
 [20241223 Moonhacker](past/2024/README.md#20241223-moonhacker---improper-input-validation)
+
+[20241218 Slurpy](past/2024/README.md#20241218-slurpycoin---logic-flaw)
+
+[20241216 BTC24H](past/2024/README.md#20241216-btc24h---logic-flaw)
+
+[20241214 JHY](past/2024/README.md#20241214-jhy---logic-flaw)
 
 [20241210 LABUBUToken](past/2024/README.md#20241210-labubu-token---logic-flaw)
 
@@ -115,11 +245,35 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 
 [20241203 Pledge](past/2024/README.md#20241203-pledge---access-control)
 
+[20241126 NFTG](past/2024/README.md#20241126-NFTG---access-control)
+
+[20241124 Proxy_b7e1](past/2024/README.md#20241124-proxy_b7e1---logic-flaw)
+
+[20241123 Ak1111](past/2024/README.md#20241123-ak1111---access-control)
+
+[20241121 Matez](past/2024/README.md#20241121-matez---integer-truncation)
+
+[20241120 MainnetSettler](past/2024/README.md#20241120-mainnetsettler---access-control)
+
 [20241119 PolterFinance](past/2024/README.md#20241119-polterfinance---flashloan-attack)
+
+[20241117 MFT](past/2024/README.md#20241117-mft---logic-flaw)
 
 [20241114 vETH](past/2024/README.md#20241114-veth---vulnerable-price-dependency)
 
 [20241111 DeltaPrime](past/2024/README.md#20241111-deltaprime---reentrancy)
+
+[20241109 X319](past/2024/README.md#20241109-X319---access-control)
+
+[20241107 ChiSale](past/2024/README.md#20241107-ChiSale---logic-flaw)
+
+[20241107 CoW](past/2024/README.md#20241107-CoW---access-control)
+
+[20241107 UniV2](past/2024/README.md#20241107-UniV2---rug-pull)
+
+[20241105 RPP](past/2024/README.md#20241105-rpp---logic-flaw)
+
+[20241029 BUBAI](past/2024/README.md#20241029-BUBAI---rug-pull)
 
 [20241026 CompoundFork](past/2024/README.md#20241026-compoundfork---flashloan-attack)
 
@@ -147,19 +301,53 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 
 [20240924 MARA](past/2024/README.md#20240924-MARA---price-manipulation)
 
+[20240923 PestoToken](past/2024/README.md#20240923-PestoToken---price-manipulation)
+
 [20240923 Bankroll_Network](past/2024/README.md#20240923-Bankroll_Network---incorrect-input-validation)
+
+[20240920 DOGGO](past/2024/README.md#20240920-DOGGO---logic-flaw)
+
+[20240920 Shezmu](past/2024/README.md#20240920-shezmu---access-control)
+
+[20240918 Unverified_766a](past/2024/README.md#20240918-unverified_766a---access-control)
+
+[20240915 WXETA](past/2024/README.md#20240915-WXETA---Logic-Flaw)
+
+[20240913 Unverified_5697](past/2024/README.md#20240913-unverified_5697---access-control)
 
 [20240913 OTSeaStaking](past/2024/README.md#20240913-OTSeaStaking---Logic-Flaw)
 
+[20240912 Unverified_03f9](past/2024/README.md#20240912-Unverified_03f9---access-control)
+
+[20240911 INUMI](past/2024/README.md#20240911-INUMI---access-control)
+
+[20240911 INUMI_db27](past/2024/README.md#20240911-INUMI_db27---access-control)
+
+[20240911 AIRBTC](past/2024/README.md#20240911-AIRBTC---access-control)
+
 [20240910 Caterpillar_Coin_CUT](past/2024/README.md#20240910-Caterpillar_Coin_CUT---price-manipulation)
 
+[20240905 Unverified_a89f](past/2024/README.md#20240905-unverified_a89f---access-control)
+
+[20240905 PLN](past/2024/README.md#20240905-PLN---access-control)
+
+[20240905 HANAToken](past/2024/README.md#20240905-HANAToken---price-manipulation)
+
+[20240904 Unverified_16d0](past/2024/README.md#20240904-unverified_16d0---access-control)
+
 [20240903 Penpiexyz_io](past/2024/README.md#20240903-Penpiexyz_io---reentrancy-and-reward-manipulation)
+
+[20240902 Pythia](past/2024/README.md#20240902-pythia---logic-flaw)
+
+[20240828 Unverified_667d](past/2024/README.md#20240828-unverified_667d---access-control)
+
+[20240828 AAVE](past/2024/README.md#20240828-aave---arbitrary-call-error)
+
+[20240820 COCO](past/2024/README.md#20240820-coco---logic-flaw)
 
 [20240816 Zenterest](past/2024/README.md#20240816-Zenterest---price-out-of-date)
 
 [20240816 OMPxContract](past/2024/README.md#20240816-ompx-contract---flashloan)
-
-[20240828 AAVE](past/2024/README.md#20240828-aave---arbitrary-call-error)
 
 [20240814 YodlRouter](past/2024/README.md#20240814-yodlrouter---arbitrary-call)
 
@@ -174,6 +362,8 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 [20240724 Spectra_finance](past/2024/README.md#20240724-spectra_finance---incorrect-input-validation)
 
 [20240723 MEVbot_0xdd7c](past/2024/README.md#20240723-mevbot_0xdd7c---incorrect-input-validation)
+
+[20250717 WETC](#20250717-wetc---incorrect-burn-logic)
 
 [20240716 Lifiprotocol](past/2024/README.md#20240716-lifiprotocol---incorrect-input-validation)
 
@@ -1148,6 +1338,8 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 
 [20210804 WaultFinance](past/2021/README.md#20210804-waultfinace---flashloan-price-manipulation)
 
+[20210804 Popsicle](past/2021/README.md#20210804-popsicle---repeated-reward-claim---logic-flaw)
+
 [20210728 Levyathan Finance](past/2021/README.md#20210728-levyathan-finance---i-lost-keys-and-minting-ii-vulnerable-emergencywithdraw)
 
 [20210710 Chainswap](past/2021/README.md#20210710-chainswap---bridge-logic-flaw)
@@ -1241,6 +1433,683 @@ If you appreciate our work, please consider donating. Even a small amount helps 
 
 ### List of DeFi Hacks & POCs
 
+### 20250830 EverValueCoin - Arbitrage
+
+### Lost: 100k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-08/EverValueCoin -vvv
+```
+#### Contract
+[EverValueCoin](src/test/2025-08/EverValueCoin)
+### Link reference
+
+https://x.com/SuplabsYi/status/1961906638438445268
+
+---
+
+### 20250831 Hexotic - Incorrect Input Validation
+
+### Lost: 500 USD
+
+```sh
+forge test --contracts ./src/test/2025-08/Hexotic_exp.sol -vvv
+```
+#### Contract
+[Hexotic_exp.sol](src/test/2025-08/Hexotic_exp.sol)
+
+### Link reference
+
+https://t.me/defimon_alerts/1757
+
+---
+
+
+### 20250827 0xf340 - Access Control
+
+### Lost: 4k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-08/0xf340_exp.sol -vvv
+```
+#### Contract
+[0xf340_exp.sol](src/test/2025-08/0xf340_exp.sol)
+
+### Link reference
+
+https://t.me/defimon_alerts/1733
+
+---
+
+### 20250823 ABCCApp - Lack of Access Control
+
+### Lost: ~ $10.1K
+
+```sh
+forge test --contracts ./src/test/2025-08/ABCCApp_exp.sol -vvv
+```
+
+#### Contract
+
+[ABCCApp_exp.sol](src/test/2025-08/ABCCApp_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1959457212914352530
+
+---
+
+### 20250820 MulticallWithXera - Access Control
+
+### Lost: 17k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-08/MulticallWithXera_exp.sol -vvv --evm-version shanghai
+```
+#### Contract
+[MulticallWithXera_exp.sol](src/test/2025-08/MulticallWithXera_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1958354933247590450
+
+---
+
+### 20250820 0x8d2e - Access Control
+
+### Lost: 40k USDC
+
+```sh
+forge test --contracts ./src/test/2025-08/0x8d2e_exp.sol -vvv --evm-version cancun
+```
+
+#### Contract
+
+[0x8d2e_exp.sol](src/test/2025-08/0x8d2e_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1958354933247590450
+
+---
+
+### 20250816 d3xai - Price Manipulation
+
+### Lost: 190 BNB
+
+```sh
+forge test --contracts ./src/test/2025-08/d3xai_exp.sol -vvv
+```
+#### Contract
+
+[d3xai_exp.sol](src/test/2025-08/d3xai_exp.sol)
+
+### Link reference
+
+https://x.com/suplabsyi/status/1956695597546893598
+
+---
+
+### 20250815 PDZ - Price Manipulation
+
+### Lost: 3.3 BNB
+
+
+```sh
+forge test --contracts ./src/test/2025-08/PDZ_exp.sol -vvv
+```
+#### Contract
+
+[PDZ_exp.sol](src/test/2025-08/PDZ_exp.sol)
+
+### Link reference
+
+https://x.com/tikkalaresearch/status/1957500585965678828
+
+---
+
+### 20250815 SizeCredit - Access Control
+
+### Lost: 19.7k USD
+
+```sh
+forge test --contracts ./src/test/2025-08/SizeCredit_exp.sol -vvv
+```
+
+#### Contract
+
+[SizeCredit_exp.sol](src/test/2025-08/SizeCredit_exp.sol)
+
+### Link reference
+
+https://x.com/SuplabsYi/status/1956306748073230785
+
+---
+
+### 20250813 YuliAI - Price Manipulation
+
+### Lost: 78k USDT
+
+```sh
+forge test --contracts ./src/test/2025-08/YuliAI_exp.sol -vvv
+```
+
+#### Contract
+
+[YuliAI_exp.sol](src/test/2025-08/YuliAI_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1955817707808432584
+
+---
+
+### 20250813 coinbase - Misconfiguration
+
+### Lost: 300k USD
+
+```sh
+forge test --contracts ./src/test/2025-08/coinbase_exp.sol -vvv --evm-version cancun
+```
+#### Contract
+[coinbase_exp.sol](src/test/2025-08/coinbase_exp.sol)
+### Link reference
+
+https://x.com/deeberiroz/status/1955718986894549344
+
+---
+
+### 20250813 Grizzifi - Logic Flaw
+
+### Lost: 61k USD
+
+```sh
+forge test --contracts ./src/test/2025-08/Grizzifi_exp.sol -vvv
+```
+
+#### Contract
+
+[Grizzifi_exp.sol](src/test/2025-08/Grizzifi_exp.sol)
+
+### Link reference
+
+https://x.com/MetaTrustAlert/status/1955967862276829375
+
+---
+
+### 20250812 Bebop - Arbitrary user input
+
+### Lost: 21k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-08/Bebop_dex_exp.sol -vvv
+```
+#### Contract
+[Bebop_dex](src/test/2025-08/Bebop_dex_exp.sol)
+### Link reference
+
+https://x.com/SuplabsYi/status/1955230173365961128
+
+
+---
+
+### 20250811 WXC - Incorrect token burn mechanism
+
+### Lost: 37.5 WBNB
+
+
+```sh
+forge test --contracts ./src/test/2025-08/WXC_Token -vvv --evm-version shanghai
+```
+#### Contract
+[WXC_Token](src/test/2025-08/WXC_Token_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1954774967481962832
+
+---
+
+### 20250728 SuperRare - Access Control
+
+### Lost: 730K USD
+
+```sh
+forge test --contracts ./src/test/2025-07/SuperRare_exp.sol -vvv
+```
+#### Contract
+[SuperRare_exp.sol](src/test/2025-07/SuperRare_exp.sol)
+### Link reference
+
+https://x.com/SlowMist_Team/status/1949770231733530682
+
+---
+
+### 20250726 MulticallWithETH - arbitrary-call
+
+### Lost: 10K USD
+
+
+```sh
+forge test --contracts ./src/test/2025-07/MulticallWithETH_exp.sol -vvv
+```
+#### Contract
+[MulticallWithETH_exp.sol](src/test/2025-07/MulticallWithETH_exp.sol)
+### Link reference
+
+
+---
+
+### 20250724 SWAPPStaking - Incorrect Reward calculation
+
+### Lost: $32,196.28
+
+
+```sh
+forge test --contracts ./src/test/2025-07/SWAPPStaking_exp.sol -vvv
+```
+#### Contract
+[SWAPPStaking_exp.sol](src/test/2025-07/SWAPPStaking_exp.sol)
+### Link reference
+
+https://x.com/deeberiroz/status/1947213692220710950
+
+---
+
+### 20250720 Stepp2p - Logic Flaw
+
+### Lost: 43k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-07/Stepp2p_exp.sol -vvv --evm-version shanghai
+```
+#### Contract
+[Stepp2p_exp.sol](src/test/2025-07/Stepp2p_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1946887946877149520
+
+---
+
+### 20250717 WETC - Incorrect Burn Logic
+
+### Lost: 101k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-07/WETC_Token_exp.sol -vvv --evm-version shanghai
+```
+#### Contract
+[WETC_Token_exp.sol](src/test/2025-07/WETC_Token_exp.sol)
+
+### Link reference
+
+https://t.me/evmhacks/78?single
+
+---
+
+
+### 20250716 VDS - Logic Flaw
+
+### Lost: 13k USD
+
+```sh
+forge test --contracts ./src/test/2025-07/VDS_exp.sol -vvv
+```
+#### Contract
+
+[VDS_exp.sol](src/test/2025-07/VDS_exp.sol)
+
+### Link reference
+
+https://x.com/SlowMist_Team/status/1945672192471302645
+
+---
+
+### 20250709 GMX - Share price manipulation
+
+### Lost: 41M USD
+
+```sh
+forge test --contracts ./src/test/2025-07/gmx_exp.sol -vvv
+```
+#### Contract
+[gmx_exp.sol](src/test/2025-07/gmx_exp.sol)
+
+### Link reference
+
+https://x.com/GMX_IO/status/1943336664102756471
+
+---
+
+### 20250705 Unverified - Access Control
+
+### Lost: ~ $285.7K
+
+```sh
+forge test --contracts ./src/test/2025-07/unverified_54cd_exp.sol -vvv
+```
+#### Contract
+[unverified_54cd_exp.sol](src/test/2025-07/unverified_54cd_exp.sol)
+
+### Link reference
+https://x.com/TenArmorAlert/status/1941689712621576493
+
+---
+
+### 20250705 RANT - Logic Flaw
+
+### Lost: ~ $204K
+
+```sh
+forge test --contracts ./src/test/2025-07/RANTToken_exp.sol -vvv
+```
+#### Contract
+[RANTToken_exp.sol](src/test/2025-07/RANTToken_exp.sol)
+
+### Link reference
+
+- https://x.com/Phalcon_xyz/status/1941788315549946225
+- https://x.com/AgentLISA_ai/status/1942162643437203531
+
+---
+
+### 20250702 FPC - Logic Flaw
+
+### Lost: 4.7M USDT
+
+```sh
+forge test --contracts ./src/test/2025-07/FPC_exp.sol -vvv
+```
+
+#### Contract
+
+[FPC_exp.sol](src/test/2025-07/FPC_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1940423393880244327
+
+---
+
+### 20250629 Stead - Access Control
+
+### Lost: 14.5k USD
+
+```sh
+forge test --contracts ./src/test/2025-06/Stead_exp.sol -vvv
+```
+
+#### Contract
+
+[Stead_exp.sol](src/test/2025-06/Stead_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1939508301596672036
+
+---
+
+### 20250626 ResupplyFi - Share price manipulation
+
+### Lost: 9.6M USD
+
+
+```sh
+forge test --contracts ./src/test/2025-06/ResupplyFi_exp.sol -vvv
+```
+#### Contract
+[ResupplyFi_exp.sol](src/test/2025-06/ResupplyFi_exp.sol)
+### Link reference
+
+https://x.com/ResupplyFi/status/1938927974272938420
+
+---
+
+
+### 20250625 Unverified_b5cb - Access Control
+
+### Lost: 2M USD
+
+
+```sh
+forge test --contracts ./src/test/2025-06/unverified_b5cb_exp.sol -vvv
+```
+#### Contract
+[unverified_b5cb_exp.sol](src/test/2025-06/unverified_b5cb_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1937761064713941187
+
+---
+
+
+### 20250623 GradientMakerPool - Price Oracle Manipulation
+
+### Lost: 5k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-06/GradientMakerPool_exp.sol -vvv
+```
+#### Contract
+[GradientMakerPool_exp.sol](src/test/2025-06/GradientMakerPool_exp.sol)
+
+### Link reference
+
+https://t.me/defimon_alerts/1339
+
+---
+
+### 20250620 Gangsterfinance - Incorrect dividends
+
+### Lost: 16.5k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-06/Gangsterfinance.sol -vvv --evm-version shanghai
+```
+#### Contract
+[Gangsterfinance](src/test/2025-06/Gangsterfinance_exp.sol)
+### Link reference
+
+https://t.me/defimon_alerts/1323
+
+---
+
+### 20250619 BankrollStack - Incorrect dividends calculation
+
+### Lost: 5k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-06/BankrollStack_exp.sol -vvv --evm-version shanghai
+```
+#### Contract
+[BankrollStack](src/test/2025-06/BankrollStack_exp.sol)
+
+---
+
+### 20250619 BankrollNetwork - Incorrect dividends calculation
+
+### Lost: 24.5 WBNB
+
+
+```sh
+forge test --contracts ./src/test/2025-06/BankrollNetwork_exp.sol -vvv --evm-version shanghai
+```
+#### Contract
+[BankrollNetwork_exp](src/test/2025-06/BankrollNetwork_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1935618109802459464
+
+---
+
+### 20250617 MetaPool - Access Control
+
+### Lost: 25k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-06/MetaPool_exp.sol -vvv
+```
+#### Contract
+[MetaPool_exp.sol](src/test/2025-06/MetaPool_exp.sol)
+### Link reference
+
+https://x.com/peckshield/status/1934895187102454206
+
+---
+
+### 20250612 AAVEBoost---logic-flaw
+
+### Lost: 14.8K USD
+
+
+```sh
+forge test --contracts ./src/test/2025-06/AAVEBoost_exp.sol -vvv
+```
+#### Contract
+[AAVEBoost_exp](src/test/2025-06/AAVEBoost_exp.sol)
+### Link reference
+
+https://x.com/CertiKAlert/status/1933011428157563188
+
+---
+
+### 20250610 Unverified_8490---access-control
+
+### Lost: 48.3K USD
+
+
+```sh
+forge test --contracts ./src/test/2025-06/unverified_8490_exp.sol -vvv
+```
+#### Contract
+[unverified_8490_exp](src/test/2025-06/unverified_8490_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1932309011564781774
+
+---
+
+### 20250528 Corkprotocol - access-control
+
+### Lost: 12M USD
+
+
+```sh
+forge test --contracts ./src/test/2025-05/Corkprotocol_exp.sol -vvv
+```
+#### Contract
+[Corkprotocol_exp](src/test/2025-05/Corkprotocol_exp.sol)
+### Link reference
+
+https://x.com/SlowMist_Team/status/1928100756156194955
+
+
+---
+
+### 20250527 UsualMoney - Arbitrage
+
+### Lost: 43k USD
+
+```sh
+forge test --contracts ./src/test/2025-05/UsualMoney_exp.sol -vvv
+```
+#### Contract
+[UsualMoney_exp.sol](src/test/2025-05/UsualMoney_exp.sol)
+
+### Link reference
+
+https://x.com/BlockSecTeam/status/1927601457815040283
+
+---
+
+### 20250526 YDT - Logic Flaw
+
+### Lost: 41k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-05/YDTtoken_exp.sol -vvv --evm-version cancun
+```
+#### Contract
+[YDTtoken_exp](src/test/2025-05/YDTtoken_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1926587721885040686
+
+---
+
+### 20250524 RICE - Lack of Access Control
+
+### Lost: ~ $88.1K
+
+```sh
+forge test --contracts ./src/test/2025-05/RICE_exp.sol -vvv
+```
+
+#### Contract
+[RICE_exp.sol](src/test/2025-05/RICE_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1926461662644633770
+
+---
+
+### 20250520 IRYSAI - rug pull
+
+### Lost: 69.6K USD
+
+
+```sh
+forge test --contracts ./src/test/2025-05/IRYSAI_exp.sol -vvv
+```
+#### Contract
+[IRYSAI_exp](src/test/2025-05/IRYSAI_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1925012844052975776
+
+---
+
+### 20250518 KRC - deflationary token
+
+### Lost: 7k USD
+
+
+```sh
+forge test --contracts ./src/test/2025-05/KRC_token_exp.sol -vvv --evm-version shanghai
+```
+#### Contract
+[KRCToken_pair_exp](src/test/2025-05/KRCToken_pair_exp.sol)
+### Link reference
+
+https://x.com/CertikAIAgent/status/1924280794916536765
+
+---
+
+### 20250514 Unwarp - lack-of-access-control
+
+### Lost: 9K USD
+
+
+```sh
+forge test --contracts ./src/test/2025-05/Unwarp_exp.sol -vvv
+```
+#### Contract
+[Unwarp_exp.sol](src/test/2025-05/Unwarp_exp.sol)
+### Link reference
+
+---
+
 ### 20250511 MBUToken - Price Manipulation not confirmed
 
 ### Lost: ~2.16 M BUSD
@@ -1257,6 +2126,23 @@ forge test --contracts ./src/test/2025-05/MBUToken_exp.sol -vvv
 https://x.com/TenArmorAlert/status/1921474575965065701
 
 https://x.com/CertiKAlert/status/1921483904483000457
+
+---
+
+### 20250509 Nalakuvara_LotteryTicket50 - Price Manipulation
+
+### Lost: ~ 105.5K USD
+
+```sh
+forge test --contracts ./src/test/2025-05/Nalakuvara_LotteryTicket50_exp.sol -vvv
+```
+
+#### Contract
+[Nalakuvara_LotteryTicket50_exp.sol](src/test/2025-05/Nalakuvara_LotteryTicket50_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1920816516653617318
 
 ---
 
@@ -1309,10 +2195,6 @@ https://x.com/TenArmorAlert/status/1913500336301502542
 
 ---
 
-
-
-
-
 ### 20250416 YVToken - Not Slippage Protection
 
 ### Lost: 15261.68240413121964707 BUSD
@@ -1330,8 +2212,71 @@ https://x.com/TenArmorAlert/status/1912684902664782087
 
 ---
 
+### 20250416 Roar - Rug Pull
+
+### Lost: $777k
+
+```sh
+forge test --contracts ./src/test/2025-04/Roar_exp.sol -vvv
+```
+
+#### Contract
+[Roar_exp](src/test/2025-04/Roar_exp.sol)
+
+### Link reference
+
+https://x.com/CertiKAlert/status/1912430535999189042
+
+---
+
+### 20250411 Unverified 0x6077 - Lack of Access Control
+
+### Lost: ~ $62.3K
+
+```sh
+forge test --contracts ./src/test/2025-04/Unverified_6077_exp.sol -vvv
+```
+
+#### Contract
+[Unverified_6077_exp](src/test/2025-04/Unverified_6077_exp.sol)
+
+### Link reference
+
+---
+
+### 20250408 Laundromat - Logic Flaw
+
+### Lost: 1.5K USD
 
 
+```sh
+forge test --contracts ./src/test/2025-04/Laundromat_exp.sol -vvv
+```
+#### Contract
+[Laundromat_exp.sol](src/test/2025-04/Laundromat_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1909814943290884596
+
+---
+
+### 20250404 AIRWA - Access Control
+
+### Lost: $33.6K
+
+```sh
+forge test --contracts ./src/test/2025-04/AIRWA_exp.sol -vvv
+```
+
+#### Contract
+[AIRWA_exp](src/test/2025-04/AIRWA_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1908086092772900909
+
+
+---
 
 ### 20250330 LeverageSIR - Storage SLOT1 collision
 
@@ -1367,6 +2312,23 @@ forge test --contracts ./src/test/2025-03/Alkimiya_io_exp.sol -vvv
 ### Link reference
 
 https://x.com/TenArmorAlert/status/1906371419807568119
+
+---
+
+### 20250327 YziAI - Rug Pull
+
+### Lost: ~ $239.4K
+
+```sh
+forge test --contracts ./src/test/2025-03/YziAIToken_exp.sol -vvv
+```
+
+#### Contract
+[YziAIToken_exp.sol](src/test/2025-03/YziAIToken_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1905528525785805027
 
 ---
 
@@ -1437,6 +2399,55 @@ https://x.com/TenArmorAlert/status/1900525198157205692
 
 ---
 
+### 20250311 DUCKVADER - Free Mint Bug
+
+### Lost: ~ $9.6K
+
+```sh
+forge test --contracts ./src/test/2025-03/DUCKVADER_exp.sol -vvv
+```
+
+#### Contract
+[DUCKVADER_exp.sol](src/test/2025-03/DUCKVADER_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1899378096056201414
+
+---
+
+### 20250307 UNI - Logic Flaw
+
+### Lost: ~ $14K
+
+```sh
+forge test --contracts ./src/test/2025-03/UNI_exp.sol -vvv
+```
+#### Contract
+[UNI_exp](./src/test/2025-03/UNI_exp.sol)
+
+### Link reference
+
+https://x.com/CertiKAlert/status/1897973904653607330
+
+---
+
+### 20250307 SBR Token - Price Manipulation
+
+### Lost: ~ $18.4K
+
+```sh
+forge test --contracts ./src/test/2025-03/SBRToken_exp.sol -vvv
+```
+#### Contract
+[SBRToken_exp](./src/test/2025-03/SBRToken_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1897826817429442652
+
+---
+
 ### 20250305 1inch FusionV1 Settlement - Arbitrary Yul Calldata
 
 ### Lost: 4.5M
@@ -1453,6 +2464,24 @@ forge test --contracts ./src/test/2025-03/OneInchFusionV1SettlementHack.sol -vvv
 
 ---
 
+### 20250304 Pump - Not Slippage Protection
+
+### Lost: ~ $6.4K
+
+```sh
+forge test --contracts ./src/test/2025-03/Pump_exp.sol -vvv
+```
+
+#### Contract
+
+[Pump_exp.sol](src/test/2025-03/Pump_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1897115993962635520
+
+---
+
 ### 20250223 HegicOptions - Business Logic Flaw
 
 ### Lost: ~104M
@@ -1466,6 +2495,25 @@ forge test --contracts ./src/test/2025-02/HegicOptions_exp.sol -vvv
 ### Link reference
 
  [Pending]
+
+
+---
+
+### 20250222 Unverified_35bc - Reentrancy
+
+### Lost : $6.7K
+
+```sh
+forge test --contracts ./src/test/2025-02/unverified_35bc_exp.sol -vvv
+```
+
+#### Contract
+[Unverified_35bc_exp.sol](src/test/2025-02/unverified_35bc_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1893333680417890648
+
 
 ---
 
@@ -1509,6 +2557,22 @@ https://x.com/dhkleung/status/1893073663391604753
 
 ---
 
+### 20250215 unverified_d4f1 - access-control
+
+### Lost: ~15.2k
+
+
+```sh
+forge test --contracts ./src/test/2025-02/unverified_d4f1_exp.sol -vvv
+```
+#### Contract
+[unverified_d4f1_exp.sol](src/test/2025-02/unverified_d4f1_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1890776122918309932
+
+---
+
 ### 20250211 FourMeme - Logic Flaw
 
 ### Lost: ~186k
@@ -1523,6 +2587,22 @@ forge test --contracts ./src/test/2025-02/FourMeme_exp.sol -vvv --evm-version sh
 
 https://www.chaincatcher.com/en/article/2167296
 
+---
+
+### 20250208 Peapods Finance - Price Manipulation
+
+### Lost: ~ $3,500
+
+```sh
+forge test --contracts ./src/test/2025-02/PeapodsFinance_exp.sol -vvv
+```
+
+#### Contract
+[PeapodsFinance_exp.sol](src/test/2025-02/PeapodsFinance_exp.sol)
+
+### Link reference
+
+https://blog.solidityscan.com/peapods-finance-hack-analysis-bdc5432107a5
 
 ---
 
@@ -1570,6 +2650,22 @@ https://app.blocksec.com/explorer/tx/arbitrum/0xf5e753d3da60db214f2261343c1e1bc4
 
 ---
 
+### 20250114 IdolsNFT - Logic Flaw
+
+### Lost: 97 stETH
+
+
+```sh
+forge test --contracts ./src/test/2025-01/IdolsNFT_exp.sol -vvv
+```
+#### Contract
+[IdolsNFT_exp.sol](src/test/2025-01/IdolsNFT_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1879376744161132981
+
+---
+
 ### 20250113 Mosca2 - Logic Flaw
 
 ### Lost: 37.6K
@@ -1583,6 +2679,22 @@ forge test --contracts ./src/test/2025-01/Mosca2_exp.sol -vvv --evm-version shan
 ### Link reference
 
 https://x.com/TenArmorAlert/status/1878699517450883407
+
+---
+
+### 20250112 Unilend - Logic Flaw
+
+### Lost: 60 stETH
+
+
+```sh
+forge test --contracts ./src/test/2025-01/Unilend_exp.sol -vvv
+```
+#### Contract
+[Unilend_exp.sol](src/test/2025-01/Unilend_exp.sol)
+### Link reference
+
+https://slowmist.medium.com/analysis-of-the-unilend-hack-90022fa35a54
 
 ---
 
@@ -1613,6 +2725,23 @@ forge test --contracts ./src/test/2025-01/JPulsepot_exp.sol -vvv --evm-version s
 ### Link reference
 
 https://x.com/CertiKAlert/status/1877662352834793639
+
+---
+
+### 20250108 HORS - Access Control
+
+### Lost: 14.8 WBNB
+
+
+```sh
+forge test --contracts ./src/test/2025-01/HORS_exp.sol -vvv
+```
+#### Contract
+[HORS_exp.sol](src/test/2025-01/HORS_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1877032470098428058
 
 ---
 

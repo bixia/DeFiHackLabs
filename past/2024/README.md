@@ -2,7 +2,22 @@
 
 ## 2024 - List of Past DeFi Incidents
 
-155 incidents included.
+180 incidents included.
+
+### 20241227 Bizness - Reentrancy
+
+### Lost: 15.7k USD
+
+```sh
+forge test --contracts ./../../src/test/2024-12/Bizness_exp.sol -vvv
+```
+#### Contract
+[Bizness_exp.sol](../../src/test/2024-12/Bizness_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1872857132363645205
+
+---
 
 ### 20241223 Moonhacker - improper input validation
 
@@ -17,6 +32,61 @@ forge test --contracts ./../../src/test/2024-12/Moonhacker_exp.sol -vvv --evm-ve
 ### Link reference
 
 https://blog.solidityscan.com/moonhacker-vault-hack-analysis-ab122cb226f6
+
+---
+
+### 20241218 SlurpyCoin - Logic Flaw
+
+### Lost: 3k USD
+
+
+```sh
+forge test --contracts ../../src/test/2024-12/SlurpyCoin_exp.sol -vvv
+```
+
+#### Contract
+
+[SlurpyCoin_exp.sol](../../src/test/2024-12/SlurpyCoin_exp.sol)
+
+### Link reference
+
+https://x.com/CertiKAlert/status/1869580379675590731
+
+---
+
+### 20241216 BTC24H - Logic Flaw
+
+### Lost: ~ $85.7K
+
+```sh
+forge test --contracts ../../src/test/2024-12/BTC24H_exp.sol -vvv
+```
+
+#### Contract
+
+[BTC24H_exp.sol](../../src/test/2024-12/BTC24H_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1868845296945426760
+
+---
+
+
+### 20241214 JHY - Logic Flaw
+
+### Lost: 11k BSC-USD
+
+```sh
+forge test --contracts ./src/test/2024-12/JHY_exp.sol -vvv
+```
+#### Contract
+
+[JHY_exp.sol](../../src/test/2024-12/JHY_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1867950089156575317
 
 ---
 
@@ -69,6 +139,91 @@ https://x.com/TenArmorAlert/status/1864126176848965810
 
 ---
 
+### 20241126 NFTG - Access Control
+
+### Lost: 10k USD
+
+```sh
+forge test --contracts ./../../src/test/2024-11/NFTG_exp.sol -vvv
+```
+#### Contract
+
+[NFTG_exp.sol](../../src/test/2024-11/NFTG_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1861430745572745245
+
+---
+
+### 20241124 Proxy_b7e1 - Logic Flaw
+
+### Lost: 8.5k USD
+
+```sh
+forge test --contracts ./../../src/test/2024-11/proxy_b7e1_exp.sol -vvv --via-ir
+```
+#### Contract
+
+[proxy_b7e1_exp.sol](../../src/test/2024-11/proxy_b7e1_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1860867560885150050
+
+---
+
+### 20241123 Ak1111 - Access Control
+
+### Lost: 31.5K USD
+
+```sh
+forge test --contracts ./../../src/test/2024-11/Ak1111_exp.sol -vvv
+```
+#### Contract
+
+[Ak1111_exp.sol](../../src/test/2024-11/Ak1111_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1860554838897197135
+
+---
+
+### 20241121 Matez - Integer Truncation
+
+### Lost: 80k USD
+
+
+```sh
+forge test --contracts ./../../src/test/2024-11/Matez_exp.sol -vvv
+```
+#### Contract
+
+[Matez_exp.sol](../../src/test/2024-11/Matez_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1859830885966905670
+
+---
+
+### 20241120 MainnetSettler - Access Control
+
+### Lost: $66K
+
+
+```sh
+forge test --contracts ./../../src/test/2024-11/MainnetSettler_exp.sol -vvv --evm-version cancun
+```
+#### Contract
+[MainnetSettler_exp.sol](../../src/test/2024-11/MainnetSettler_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1859416451473604902
+
+---
+
 ### 20241119 PolterFinance - FlashLoan Attack
 
 ### Lost: $7M
@@ -82,6 +237,24 @@ forge test --contracts ./../../src/test/2024-11/PolterFinance_exploit.sol -vvv
 ### Link reference
 
 https://twitter.com/Bcpaintball26/status/1857865758551805976
+
+---
+
+### 20241117 MFT - Logic Flaw
+
+### Lost: 33.7k USD
+
+```sh
+forge test --contracts ./../../src/test/2024-11/MFT_exp.sol -vvv
+```
+
+#### Contract
+
+[MFT_exp.sol](../../src/test/2024-11/MFT_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1858351609371406617
 
 ---
 
@@ -103,7 +276,7 @@ https://x.com/TenArmorAlert/status/1856984299905716645
 
 ### 20241111 DeltaPrime - Reentrancy
 
-### Lost: $4.75 M
+### Lost: $12.9 K
 
 
 ```sh
@@ -114,6 +287,103 @@ forge test --contracts ./../../src/test/2024-11/DeltaPrime_exp.sol -vvv
 ### Link reference
 
 https://x.com/peckshield/status/1855910524460159197
+
+---
+
+### 20241109 X319 - Access Control
+
+### Lost: $12.9 K
+
+
+```sh
+forge test --contracts ./../../src/test/2024-11/X319_exp.sol -vvv
+```
+#### Contract
+[X319_exp.sol](../../src/test/2024-11/X319_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1855263208124416377
+
+---
+
+### 20241107 ChiSale - Logic Flaw
+
+### Lost: $16.3 K
+
+
+```sh
+forge test --contracts ./../../src/test/2024-11/ChiSale_exp.sol -vvv
+```
+#### Contract
+[ChiSale_exp.sol](../../src/test/2024-11/ChiSale_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1854357930382156107
+
+---
+
+### 20241107 CoW - Access Control
+
+### Lost: $59 K
+
+
+```sh
+forge test --contracts ./../../src/test/2024-11/CoW_exp.sol -vvv
+```
+#### Contract
+[CoW_exp.sol](../../src/test/2024-11/CoW_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1854538807854649791
+
+---
+
+### 20241107 VRug - Rug pull
+
+### Lost: $8.4 K
+
+
+```sh
+forge test --contracts ./../../src/test/2024-11/VRug_exp.sol -vvv
+```
+#### Contract
+[VRug_exp.sol](../../src/test/2024-11/VRug_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1854702463737380958
+
+---
+
+### 20241105 RPP - Logic Flaw
+
+### Lost: ~ $14.1K
+
+```sh
+forge test --contracts ./../../src/test/2024-11/RPP_exp.sol -vvv
+```
+
+#### Contract
+[RPP_exp.sol](../../src/test/2024-11/RPP_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1853984974309142768
+
+---
+
+### 20241029 BUBAI - Rug pull
+
+### Lost: $131K
+
+
+```sh
+forge test --contracts ./../../src/test/2024-10/BUBAI_exp.sol -vvv
+```
+#### Contract
+[BUBAI_exp.sol](../../src/test/2024-10/BUBAI_exp.sol)
+### Link reference
+
+https://x.com/TenArmorAlert/status/1851445795918118927
 
 ---
 
@@ -363,6 +633,113 @@ https://x.com/Phalcon_xyz/status/1838042368018137547
 
 ---
 
+### 20240923 PestoToken - Price Manipulation
+
+### Lost: 1.4K
+
+```sh
+forge test --contracts ./../../src/test/2024-09/PestoToken_exp.sol -vvv
+```
+
+#### Contract
+
+[PestoToken_exp.sol](/../../src/test/2024-09/PestoToken_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1838225968009527652
+
+---
+
+### 20240920 DOGGO - Logic Flaw
+
+### Lost: 7K USD
+
+
+```sh
+forge test --contracts ./../../src/test/2024-09/DOGGO_exp.sol -vvv
+```
+
+#### Contract
+
+[DOGGO_exp.sol](../../src/test/2024-09/DOGGO_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1837358462076080521
+
+---
+
+### 20240920 Shezmu - Access Control
+
+### Lost: 4.9M USD
+
+
+```sh
+forge test --contracts ./../../src/test/2024-09/Shezmu_exp.sol -vvv
+```
+
+#### Contract
+
+[Shezmu_exp.sol](../../src/test/2024-09/Shezmu_exp.sol)
+
+### Link reference
+
+https://x.com/shoucccc/status/1837228053862437244
+
+---
+
+### 20240918 Unverified_766a - Access control
+
+### Lost: 100 USD
+
+```sh
+forge test --contracts ./../../src/test/2024-09/unverified_766a_exp.sol -vvv
+```
+#### Contract
+
+[unverified_766a_exp.sol](../../src/test/2024-09/unverified_766a_exp.sol)
+
+### Link reference
+https://x.com/TenArmorAlert/status/1836339028616188321
+
+
+
+---
+
+### 20240915 WXETA - Logic Flaw
+
+### Lost: 110K
+
+```sh
+forge test --contracts ./../../src/test/2024-09/WXETA_exp.sol -vvv
+```
+#### Contract
+
+[WXETA_exp.sol](../../src/test/2024-09/WXETA_exp.sol)
+
+### Link reference
+https://x.com/TenArmorAlert/status/1835494807495659645
+
+
+---
+
+### 20240913 Unverified_5697 - Access Control
+
+### Lost: 12K
+
+```sh
+forge test --contracts ./../../src/test/2024-09/unverified_5697_exp.sol -vvv
+```
+#### Contract
+
+[unverified_5697_exp.sol](../../src/test/2024-09/unverified_5697_exp.sol)
+
+### Link reference
+https://x.com/TenArmorAlert/status/1834432197375533433
+
+---
+
 ### 20240913 OTSeaStaking - Logic Flaw
 
 ### Lost: 26k
@@ -376,6 +753,72 @@ forge test --match-contract OTSeaStaking_exp -vvv
 
 ### Link reference
 
+---
+
+### 20240912 Unverified_03f9 - Access Control
+
+### Lost: 1.7k
+
+```sh
+forge test --contracts ./../../src/test/2024-09/unverified_03f9_exp.sol -vvv
+```
+#### Contract
+
+[unverified_03f9_exp.sol](../../src/test/2024-09/unverified_03f9_exp.sol)
+
+### Link reference
+https://x.com/TenArmorAlert/status/1834488796953673862
+
+---
+
+### 20240911 INUMI - Access control
+
+### Lost: ~11.7k USD
+
+```sh
+forge test --contracts ./../../src/test/2024-09/INUMI_exp.sol -vvv
+```
+
+#### Contract
+
+[INUMI_exp.sol](/../../src/test/2024-09/INUMI_exp.sol)
+
+### Link reference
+https://x.com/TenArmorAlert/status/1834504921561100606
+
+---
+
+### 20240911 INUMI_db27 - Access control
+
+### Lost: ~4.7k USD
+
+```sh
+forge test --contracts ./../../src/test/2024-09/IUNMI_db27_exp.sol -vvv
+```
+
+#### Contract
+
+[IUNMI_db27_exp.sol](/../../src/test/2024-09/IUNMI_db27_exp.sol)
+
+### Link reference
+https://x.com/TenArmorAlert/status/1834503422655263099
+
+---
+
+### 20240911 AIRBTC_exp - Access control
+
+### Lost: ~6.8k USD
+
+```sh
+forge test --contracts ./../../src/test/2024-09/AIRBTC_exp.sol -vvv
+```
+
+#### Contract
+
+[AIRBTC_exp.sol](/../../src/test/2024-09/AIRBTC_exp.sol)
+
+### Link reference
+https://x.com/TenArmorAlert/status/1833825098962550802
 
 ---
 
@@ -397,6 +840,82 @@ https://www.certik.com/zh-CN/resources/blog/caterpillar-coin-cut-token-incident-
 
 
 ---
+
+### 20240905 Unverified_a89f - Access control
+
+### Lost: 1.5k
+
+```sh
+forge test --contracts ./../../src/test/2024-09/unverified_a89f_exp.sol -vvv
+```
+
+#### Contract
+
+[unverified_a89f_exp.sol](/../../src/test/2024-09/unverified_a89f_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1831637553415610877
+
+---
+
+### 20240905 PLN - Access control
+
+### Lost: 400K USD
+
+```sh
+forge test --contracts ./../../src/test/2024-09/PLN_exp.sol -vvv
+```
+
+#### Contract
+
+[PLN_exp.sol](/../../src/test/2024-09/PLN_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1831525062253654300
+
+
+---
+
+### 20240905 HANAToken - Price Manipulation
+
+### Lost: 283 USD
+
+```sh
+forge test --contracts ./../../src/test/2024-09/HANAToken_exp.sol -vvv
+```
+
+#### Contract
+
+[HANAToken_exp.sol](/../../src/test/2024-09/HANAToken_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1838963740731203737
+
+
+---
+
+### 20240904 Unverified_16d0 - Access control
+
+### Lost: 329 USD
+
+```sh
+forge test --contracts ./../../src/test/2024-09/unverified_16d0.sol -vvv
+```
+
+#### Contract
+
+[unverified_16d0.sol](/../../src/test/2024-09/unverified_16d0.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1831511554619273630
+
+
+---
+
 
 ### 20240903 Penpiexyz_io - Reentrancy and Reward Manipulation
 
@@ -421,6 +940,39 @@ post-morten: https://x.com/Penpiexyz_io/status/1831462760787452240
 
 ---
 
+### 20240902 Pythia - Logic Flaw
+
+### Lost: 21 ETH
+
+```sh
+forge test --contracts ./../../src/test/2024-09/Pythia_exp.sol -vvv
+```
+#### Contract
+[Pythia_exp.sol](../../src/test/2024-09/Pythia_exp.sol)
+### Link reference
+
+https://x.com/QuillAudits_AI/status/1830976830607892649
+
+---
+
+### 20240828 Unverified_667d - Access control
+
+### Lost: $10k
+
+```sh
+forge test --contracts ./../../src/test/2024-08/unverified_667d_exp.sol -vvv
+```
+
+#### Contract
+
+[unverified_667d_exp.sol](../../src/test/2024-08/unverified_667d_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1828983569278231038
+
+---
+
 ### 20240828 AAVE - Arbitrary Call Error
 
 ### Lost: 52000
@@ -436,6 +988,25 @@ forge test --match-contract AAVE_Repay_Adapter -vvv
 ### Link reference
 
 https://www.vibraniumaudits.com/post/aave-hacked-via-periphery-contract-56kstolenfromtipjar
+
+---
+
+### 20240820 Coco - Logic flaw
+
+### Lost: 280BNB
+
+```sh
+forge test --contracts ./../../src/test/2024-08/COCO_exp.sol -vvv
+```
+#### Contract
+
+[COCO_exp.sol](../../src/test/2024-08/COCO_exp.sol)
+
+### Link reference
+
+https://x.com/TenArmorAlert/status/1826101724278579639
+
+---
 
 ### 20240816 Zenterest - Price Out Of Date
 
@@ -802,7 +1373,7 @@ forge test --match-contract INcufi_exp -vvv
 
 #### Contract
 
-[INcufi_exp.sol](../../src/test/2024-06/Incufi_exp.sol)
+[INcufi_exp.sol](../../src/test/2024-06/INcufi_exp.sol)
 
 ### Link reference
 
@@ -2525,7 +3096,7 @@ https://twitter.com/Phalcon_xyz/status/1752278614551216494
 
 https://twitter.com/peckshield/status/1752279373779194011
 
-https://phalcon.blocksec.com/explorer/security-incidents
+https://app.blocksec.com/explorer/security-incidents
 
 ---
 
@@ -2561,7 +3132,7 @@ forge test --match-contract BarleyFinance_exp -vvv
 
 #### Link reference
 
-https://phalcon.blocksec.com/explorer/security-incidents
+https://app.blocksec.com/explorer/security-incidents
 
 https://www.bitget.com/news/detail/12560603890246
 
@@ -2635,7 +3206,7 @@ forge test --match-contract Bmizapper_exp -vvv
 
 #### Contract
 
-[BmiZapper_exp.sol](../../src/test/2024-01/BmiZapper_exp.sol)
+[BmiZapper_exp.sol](../../src/test/2024-01/Bmizapper_exp.sol)
 
 #### Link reference
 
