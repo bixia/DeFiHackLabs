@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cauldron V4 业务逻辑图 - 可视化</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        h2 {
+            color: #764ba2;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-top: 50px;
+        }
+        .diagram {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .description {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .danger {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .toc {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc li {
+            padding: 8px 0;
+        }
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .toc a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .legend {
+            background: #fff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .legend-item {
+            display: inline-block;
+            margin: 5px 15px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 Cauldron V4 业务逻辑图</h1>
+        <p class="subtitle">基于实际合约源代码的深度分析 | MIMSpell3 攻击案例研究</p>
+
+        <div class="legend">
+            <strong>图例说明：</strong>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #90EE90;"></span>
+                <span>正常流程/成功</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #FF6B6B;"></span>
+                <span>错误/攻击/失败</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #FFD700;"></span>
+                <span>关键检查点/警告</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #87CEEB;"></span>
+                <span>系统组件</span>
+            </div>
+        </div>
+
+        <div class="toc">
+            <h3>📑 目录</h3>
+            <ul>
+                <li><a href="#architecture">1. 系统架构概览</a></li>
+                <li><a href="#cook-flow">2. Cook函数工作流程</a></li>
+                <li><a href="#borrow-flow">3. 借款流程详解</a></li>
+                <li><a href="#solvency">4. Solvency检查机制</a></li>
+                <li><a href="#attack">5. 攻击向量分析</a></li>
+                <li><a href="#repay">6. 还款流程</a></li>
+                <li><a href="#comparison">7. 正常vs攻击场景对比</a></li>
+            </ul>
+        </div>
+
+        <div class="danger">
+            <strong>⚠️ 安全警告：</strong> 本文档展示的是真实的DeFi安全漏洞案例。这6个Cauldron合约因配置错误导致$1.7M损失。请仅用于学习和安全研究目的。
+        </div>
+
+        <h2 id="architecture">1. 📊 系统架构概览</h2>
+        <div class="description">
+            Cauldron V4 是一个借贷协议合约，用户可以存入抵押品（Collateral）借出MIM稳定币。所有资金都托管在BentoBox合约中，采用share机制管理余额。
+        </div>
+        <div class="diagram">
+            <pre class="mermaid">
+graph TB
+    User[👤 用户/攻击者] --> Cauldron[🏦 Cauldron V4 合约]
+    Cauldron --> BentoBox[💰 BentoBox 资金池]
+    Cauldron --> Oracle[📊 价格预言机]
+    BentoBox --> MIM[🪙 MIM Token<br/>Magic Internet Money]
+    BentoBox --> Collateral[🔒 抵押品 Token<br/>ETH/USDC/etc]
+    
+    style Cauldron fill:#f9f,stroke:#333,stroke-width:4px
+    style BentoBox fill:#bbf,stroke:#333,stroke-width:2px
+    style User fill:#bfb,stroke:#333,stroke-width:2px
+    style MIM fill:#FFD700,stroke:#333,stroke-width:2px
+    style Oracle fill:#FFA500,stroke:#333,stroke-width:2px
+            </pre>
+        </div>
+
+        <h2 id="cook-flow">2. 🔄 Cook函数工作流程</h2>
+        <div class="description">
+            <code>cook()</code> 是Cauldron的核心函数，支持批量执行多种操作。它接受一个actions数组，依次执行每个action。这种设计提供了灵活性，但也带来了安全风险。
+        </div>
+        <div class="warning">
+            <strong>🔑 关键点：</strong> 只有特定的actions（如BORROW、REMOVE_COLLATERAL）会触发<code>needsSolvencyCheck</code>标志，在函数最后才会检查用户的抵押品是否充足。
+        </div>
+        <div class="diagram">
+            <pre class="mermaid">
+flowchart TD
+    Start[🎬 开始: cook调用] --> Loop{🔄 遍历actions数组}
+    
+    Loop -->|action < 10| Accrue[⏰ 执行accrue利息累计]
+    Accrue --> CheckAction{🎯 判断action类型}
+    Loop -->|action >= 10| CheckAction
+    
+    CheckAction -->|10| AddCol[➕ 添加抵押品]
+    CheckAction -->|2| Repay[💸 还款]
+    CheckAction -->|4| RemoveCol[➖ 移除抵押品]
+    CheckAction -->|5| Borrow[💰 借款]
+    CheckAction -->|20| BentoDep[📥 BentoBox存款]
+    CheckAction -->|21| BentoWith[📤 BentoBox取款]
+    
+    AddCol --> NextAction[➡️ 继续下一个action]
+    Repay --> NextAction
+    RemoveCol --> SetCheck1[🚨 设置needsSolvencyCheck=true]
+    Borrow --> SetCheck2[🚨 设置needsSolvencyCheck=true]
+    BentoDep --> NextAction
+    BentoWith --> NextAction
+    
+    SetCheck1 --> NextAction
+    SetCheck2 --> NextAction
+    
+    NextAction --> Loop
+    Loop -->|✅ 完成所有actions| SolvencyCheck{❓ needsSolvencyCheck?}
+    
+    SolvencyCheck -->|是| UpdateRate[📊 更新汇率]
+    UpdateRate --> CheckSolvent{🔍 _isSolvent检查}
+    CheckSolvent -->|通过| End[✅ 执行成功]
+    CheckSolvent -->|失败| Revert1[❌ Revert: user insolvent]
+    
+    SolvencyCheck -->|否| End
+    
+    style Start fill:#90EE90
+    style End fill:#90EE90
+    style Revert1 fill:#FF6B6B
+    style Borrow fill:#FFD700
+    style CheckSolvent fill:#FFD700
+    style SetCheck1 fill:#FFA500
+    style SetCheck2 fill:#FFA500
+            </pre>
+        </div>
+
+        <h2 id="borrow-flow">3. 💰 借款流程详解 (ACTION_BORROW)</h2>
+        <div class="danger">
+            <strong>🔥 漏洞关键：</strong> 这是攻击者实际利用的函数。POC中虽然标记为<code>ACTION_REPAY</code>，但实际调用的是<code>ACTION_BORROW=5</code>。
+        </div>
+        <div class="diagram">
+            <pre class="mermaid">
+sequenceDiagram
+    participant User as 👤 用户/攻击者
+    participant Cauldron as 🏦 Cauldron
+    participant BentoBox as 💰 BentoBox
+    
+    User->>Cauldron: cook([5, 0], values, [amount, address(this)])
+    activate Cauldron
+    
+    Note over Cauldron: ACTION_BORROW = 5
+    Cauldron->>Cauldron: _borrow(to, amount)
+    
+    rect rgb(255, 240, 240)
+        Note over Cauldron: 🔴 关键检查点
+        Cauldron->>Cauldron: ✅ CHECK 1: totalBorrow <= cap.total
+        Cauldron->>Cauldron: 🚨 CHECK 2: newBorrowPart <= cap.borrowPartPerAddress
+        Note over Cauldron: ⚠️ 如果配置过高，检查形同虚设！
+        
+        Cauldron->>Cauldron: _preBorrowAction(...)
+        Note over Cauldron: ⚠️ 这是空函数！没有任何检查！
+    end
+    
+    Cauldron->>Cauldron: userBorrowPart[user] = newBorrowPart
+    
+    Cauldron->>BentoBox: transfer(MIM, Cauldron, User, share)
+    Note over BentoBox: 💸 MIM被转给攻击者
+    BentoBox-->>Cauldron: Transfer完成
+    
+    Cauldron->>Cauldron: status.needsSolvencyCheck = true
+    
+    Note over Cauldron: 🔥 最终Solvency检查
+    Cauldron->>Cauldron: _isSolvent(user, exchangeRate)
+    
+    alt 抵押品充足或检查被绕过
+        Cauldron-->>User: ✅ 借款成功
+    else 抵押品不足
+        Cauldron-->>User: ❌ Revert: user insolvent
+    end
+    
+    deactivate Cauldron
+            </pre>
+        </div>
+
+        <h2 id="solvency">4. 🔒 Solvency检查机制</h2>
+        <div class="description">
+            <code>_isSolvent()</code> 函数检查用户的抵押品是否足够覆盖借款。这是协议的最后一道防线。
+        </div>
+        <div class="warning">
+            <strong>⚠️ 绕过方式：</strong>
+            <ul>
+                <li>提供微量抵押品（如1 wei的某个代币）</li>
+                <li>利用Oracle价格延迟或操纵</li>
+                <li><code>COLLATERIZATION_RATE</code>配置过低</li>
+                <li>某些Cauldron直接配置为允许低抵押率</li>
+            </ul>
+        </div>
+        <div class="diagram">
+            <pre class="mermaid">
+flowchart TD
+    Start[🔍 _isSolvent检查] --> GetBorrow[获取userBorrowPart]
+    GetBorrow --> CheckBorrow{borrowPart == 0?}
+    
+    CheckBorrow -->|是| ReturnTrue1[✅ return true<br/>无借款=总是solvent]
+    CheckBorrow -->|否| GetCollateral[获取userCollateralShare]
+    
+    GetCollateral --> CheckCollateral{collateralShare == 0?}
+    CheckCollateral -->|是| ReturnFalse[❌ return false<br/>有借款无抵押=insolvent]
+    CheckCollateral -->|否| CalcValues[计算抵押品价值和借款价值]
+    
+    CalcValues --> Compare{collateralValue<br/>>= borrowValue?}
+    
+    Compare -->|是| ReturnTrue2[✅ return true<br/>抵押品充足]
+    Compare -->|否| ReturnFalse2[❌ return false<br/>抵押品不足]
+    
+    style ReturnTrue1 fill:#90EE90
+    style ReturnTrue2 fill:#90EE90
+    style ReturnFalse fill:#FF6B6B
+    style ReturnFalse2 fill:#FF6B6B
+    style Compare fill:#FFD700
+            </pre>
+        </div>
+
+        <h2 id="attack">5. 🚨 攻击向量分析</h2>
+        <div class="danger">
+            <strong>💀 攻击路径：</strong> 攻击者通过识别配置错误的Cauldron，利用过高的借款限额、空的_preBorrowAction和可绕过的Solvency检查，在单笔交易中窃取$1.7M。
+        </div>
+        <div class="diagram">
+            <pre class="mermaid">
+flowchart TD
+    Attacker[👹 攻击者] --> Recon[🔍 侦查阶段]
+    
+    Recon --> Check1{borrowPartPerAddress<br/>是否过高?}
+    Check1 -->|是| Check2{_preBorrowAction<br/>是否为空?}
+    Check1 -->|否| NotVuln1[❌ 不易受攻击]
+    
+    Check2 -->|是| Check3{Solvency检查<br/>可绕过?}
+    Check2 -->|否| NotVuln2[❌ 不易受攻击]
+    
+    Check3 -->|是| Vulnerable[✅ 发现漏洞!]
+    Check3 -->|否| NotVuln3[❌ 不易受攻击]
+    
+    Vulnerable --> Deploy[🚀 部署攻击合约]
+    Deploy --> Attack[⚔️ 攻击执行]
+    
+    Attack --> Loop[🔄 遍历6个Cauldron]
+    Loop --> CallCook[调用cook with ACTION_BORROW]
+    
+    CallCook --> Pass1[✅ borrowPartPerAddress检查通过<br/>限额过高]
+    Pass1 --> Pass2[✅ _preBorrowAction通过<br/>空函数]
+    Pass2 --> Pass3[✅ _isSolvent通过<br/>微量抵押品]
+    
+    Pass3 --> GetMIM[💰 获得MIM share]
+    GetMIM --> NextCauldron{还有更多Cauldron?}
+    
+    NextCauldron -->|是| Loop
+    NextCauldron -->|否| Withdraw[📤 从BentoBox提取所有MIM]
+    
+    Withdraw --> Swap1[🔄 MIM → 3CRV]
+    Swap1 --> Swap2[🔄 3CRV → USDT]
+    Swap2 --> Swap3[🔄 USDT → WETH]
+    Swap3 --> Success[💰 攻击成功!<br/>获利$1.7M]
+    
+    style Attacker fill:#FF6B6B
+    style Vulnerable fill:#FFD700
+    style Success fill:#8B0000,color:#fff
+    style Pass1 fill:#FFA500
+    style Pass2 fill:#FFA500
+    style Pass3 fill:#FFA500
+            </pre>
+        </div>
+
+        <h2 id="repay">6. 💸 还款流程 (ACTION_REPAY)</h2>
+        <div class="success">
+            <strong>ℹ️ 说明：</strong> 这是正常的还款流程。POC中虽然声称使用ACTION_REPAY，但实际上攻击者使用的是ACTION_BORROW（值=5），而不是真正的ACTION_REPAY（值=2）。
+        </div>
+        <div class="diagram">
+            <pre class="mermaid">
+flowchart LR
+    User[👤 用户] -->|ACTION_REPAY=2| Repay[_repay函数]
+    Repay --> Sub[减少userBorrowPart]
+    Sub --> Transfer[BentoBox.transfer<br/>user → Cauldron]
+    Transfer --> Success[✅ 还款成功]
+    
+    style Success fill:#90EE90
+    style Repay fill:#87CEEB
+            </pre>
+        </div>
+        <div class="description">
+            注意：还款操作<strong>不会触发</strong> <code>needsSolvencyCheck</code>，因为还款只会改善用户的抵押率，不会恶化。
+        </div>
+
+        <h2 id="comparison">7. ⚖️ 正常vs攻击场景对比</h2>
+        <div class="diagram">
+            <pre class="mermaid">
+flowchart TD
+    subgraph Normal[💚 正常借款场景]
+        N1[用户存入充足抵押品<br/>抵押率 >= 150%] --> N2[调用borrow<br/>合理金额]
+        N2 --> N3[✅ borrowPartPerAddress<br/>通过]
+        N3 --> N4[✅ _preBorrowAction<br/>通过]
+        N4 --> N5[✅ _isSolvent检查<br/>150%抵押率通过]
+        N5 --> N6[✅ 获得借款<br/>正常使用]
+    end
+    
+    subgraph Attack[💀 攻击场景]
+        A1[攻击者无/微量抵押品<br/>抵押率 0-10%] --> A2[调用cook with ACTION_BORROW<br/>最大金额]
+        A2 --> A3[✅ borrowPartPerAddress<br/>配置过高-通过!]
+        A3 --> A4[✅ _preBorrowAction<br/>空函数-通过!]
+        A4 --> A5[✅ _isSolvent检查<br/>被绕过-通过!]
+        A5 --> A6[💀 窃取大量MIM<br/>$1.7M]
+    end
+    
+    style N6 fill:#90EE90
+    style A6 fill:#8B0000,color:#fff
+    style A3 fill:#FFD700
+    style A4 fill:#FFD700
+    style A5 fill:#FFD700
+            </pre>
+        </div>
+
+        <div class="danger">
+            <h3>🔥 关键差异</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="background: #f0f0f0;">
+                    <th style="padding: 10px; border: 1px solid #ddd;">检查项</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">正常场景</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">攻击场景</th>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>抵押品</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">充足（150%+）</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; background: #ffebee;">无或极少（0-10%）</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>借款金额</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">合理范围内</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; background: #ffebee;">最大化（掏空Cauldron）</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>borrowPartPerAddress</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">限制有效</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; background: #ffebee;">配置过高，形同虚设</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>_preBorrowAction</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">通过（空函数）</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; background: #ffebee;">通过（空函数！）</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>_isSolvent</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">通过（充足抵押）</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; background: #ffebee;">被绕过（微量抵押/配置错误）</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="success">
+            <h3>✅ 安全建议</h3>
+            <ol>
+                <li><strong>合理设置借款限额：</strong> <code>borrowPartPerAddress</code>应该基于协议TVL和风险评估动态调整</li>
+                <li><strong>实现_preBorrowAction：</strong> 不应该是空函数，至少要检查抵押品存在性</li>
+                <li><strong>增强Solvency检查：</strong> 添加最低抵押率要求（如125%），不能仅依赖配置参数</li>
+                <li><strong>添加速率限制：</strong> 限制单笔交易的借款金额和频率</li>
+                <li><strong>使用可靠的Oracle：</strong> 确保价格数据及时准确，考虑使用多个数据源</li>
+                <li><strong>实施紧急暂停：</strong> 所有关键函数都应有暂停开关</li>
+                <li><strong>全面的测试：</strong> 包括边界情况、极限借款、零抵押等场景</li>
+            </ol>
+        </div>
+
+        <hr style="margin: 40px 0; border: 2px solid #667eea;">
+
+        <div style="text-align: center; color: #666; margin-top: 30px;">
+            <p><strong>文档版本：</strong> 1.0</p>
+            <p><strong>生成时间：</strong> 2025-10-12</p>
+            <p><strong>基于：</strong> Cauldron V4 实际合约源代码分析</p>
+            <p><strong>案例：</strong> MIMSpell3 攻击 ($1.7M损失)</p>
+            <p style="margin-top: 20px; font-size: 0.9em;">
+                ⚠️ 本文档仅供安全研究和教育目的使用
+            </p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                fontSize: '16px'
+            }
+        });
+    </script>
+</body>
+</html>
+
