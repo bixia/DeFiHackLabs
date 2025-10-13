@@ -12,6 +12,22 @@
 - **Vulnerable Contract(s)**: 0x18775475f50557b96C63E8bbf7D75bFeB412082D, 0x18775475f50557b96C63E8bbf7D75bFeB412082D
 - **Attack Contract(s)**: 0x9776c0abe8ae3c9ca958875128f1ae1d5afafcb8
 
+## 🎯 根本原因
+
+FireToken 在卖出路径（`_transfer()` 当 `to == uniswapV2Pair`）主动从 LP 扣减并将代币销毁至黑洞地址，再调用 `sync()` 固化失衡。这会在真正交换发生前改变 AMM 储备，使价格计算基于被动减少的 FIRE 储备、未同步补偿的 WETH 储备，从而被攻击者以更优价格从池子抽走 WETH。配合多实例与重复操作，可进一步放大收益。
+
+关键点：
+- 向 LP 的“卖出转账”触发从 LP 余额直接扣减并销毁（影响 x·y=k）。
+- `sync()` 在销毁后调用，固化失衡，产生套利窗口。
+- 可多次重复以累积收益，或用外部资金放大效果。
+
+## 🛠️ 修复建议
+
+- 禁止在向 LP 的转账中主动修改 LP 余额（移除卖出路径下 LP 扣减/销毁）。
+- 若需通缩，排除 LP 地址或改为仅对用户侧生效，且不影响 AMM 储备。
+- 对路由调用设置最小成交量与频控；监控异常向 LP 的大额直转与频繁 `sync()`。
+- 使用经审计的代币模板，避免在 `_transfer` 中引入影响 AMM 储备的副作用。
+
 ## 🔍 Technical Analysis
 
 # FireToken Exploit Deep Analysis
