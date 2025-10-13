@@ -12,6 +12,17 @@
 - **Vulnerable Contract(s)**: 0x6beee2b57b064eac5f432fc19009e3e78734eabc, 0x6beee2b57b064eac5f432fc19009e3e78734eabc
 - **Attack Contract(s)**: 0x3f32c7cfb0a78ddea80a2384ceb4633099cbdc98
 
+## 🎯 根本原因（简要）
+- 非标准代币机制将“向合约自身或特定地址转账”视作卖出路径，并在 `transfer` 中执行大比例销毁/费用分配，改变供应与 AMM 储备关系；
+- 结合闪电贷与多地址并发卖出，可在短时内放大价格失真，最终通过支持手续费代币的路由完成套现；
+- 费用/销毁的会计与 AMM 储备未同步，形成可套利窗口。
+
+## 🛠️ 修复建议（简要）
+- 将买/卖逻辑与 `transfer` 解耦，禁止“向合约转账即卖出”的隐式路径；
+- 对 AMM 相关地址实施费率白名单或特殊处理，避免对池子转账触发销毁/扣费；
+- 使用 TWAP/Oracle 做价格保护，限制单笔/单块成交与并发，设置非零最小成交量；
+- 对大额/高频交易引入冷却与风控，并移除会改变 AMM 储备的不确定副作用。
+
 ## 🔍 Technical Analysis
 
 Based on the provided information, I'll conduct a detailed analysis of the P719Token exploit. The attack appears to be a sophisticated price manipulation attack leveraging the token's transfer function mechanics.
