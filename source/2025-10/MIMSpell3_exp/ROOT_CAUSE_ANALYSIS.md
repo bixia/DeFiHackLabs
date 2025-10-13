@@ -220,13 +220,13 @@ modifier allowed(address from) {
 3. **POC中实际调用的是ACTION_BORROW (值=5)**，尽管注释说是ACTION_REPAY：
 
 ```solidity
-// POC代码中的"误导性"注释
-uint8 private constant ACTION_REPAY = 5;  // ❌ 实际上是ACTION_BORROW!
+// POC代码中的"误导性"注释修正
+uint8 private constant ACTION_BORROW = 5;  // 正确：对应ACTION_BORROW
 uint8 private constant ACTION_NO_OP = 0;
 
 // 攻击参数
 uint8[] memory actions = new uint8[](2);
-actions[0] = ACTION_REPAY;  // 实际上是5，对应真实的ACTION_BORROW
+actions[0] = ACTION_BORROW;  // 使用借款动作
 actions[1] = ACTION_NO_OP;   // 空操作
 
 // 编码的数据
@@ -262,7 +262,7 @@ address[6] private CAULDRONS = [
 ```solidity
 // 攻击者构造cook调用参数
 uint8[] memory actions = new uint8[](2);
-actions[0] = ACTION_REPAY;  // 在POC中标记为5，实际对应ACTION_BORROW
+actions[0] = ACTION_BORROW;  // 正确：5 = ACTION_BORROW
 actions[1] = ACTION_NO_OP;   // 值为0，空操作
 
 uint256[] memory values = new uint256[](2);  // 全为0
@@ -434,16 +434,15 @@ function _swapUSDTToWETH() internal {
 
 #### 核心利用技巧
 
-**技巧1: 利用ACTION_REPAY的检查缺失**
+**技巧1: 直接用ACTION_BORROW将可借额度拉满**
 ```solidity
-// POC中最关键的部分
-uint8 private constant ACTION_REPAY = 5;  // 声称要还款
-uint8 private constant ACTION_NO_OP = 0;  // 但什么都不做
+// 关键点：使用借款动作而非还款
+uint8 private constant ACTION_BORROW = 5;
+uint8 private constant ACTION_NO_OP = 0;
 
-// 这个组合欺骗了Cauldron:
-// - ACTION_REPAY让Cauldron减少debt记录
-// - ACTION_NO_OP填充数组但不执行任何操作
-// - 结果：debt减少但没有实际还款！
+uint8[] memory actions = new uint8[](2);
+actions[0] = ACTION_BORROW;  // 借款
+actions[1] = ACTION_NO_OP;   // 占位
 ```
 
 **技巧2: 批量攻击多个Cauldron**
@@ -473,12 +472,12 @@ for (uint256 i = 0; i < CAULDRONS.length; i++) {
 ```
 攻击者EOA (0x1aaade...)
   └─→ 攻击合约.testExploit() (0xb8e0a4...)
-      ├─→ Cauldron[0].cook(ACTION_REPAY) → 借出MIM
-      ├─→ Cauldron[1].cook(ACTION_REPAY) → 借出MIM  
-      ├─→ Cauldron[2].cook(ACTION_REPAY) → 借出MIM
-      ├─→ Cauldron[3].cook(ACTION_REPAY) → 借出MIM
-      ├─→ Cauldron[4].cook(ACTION_REPAY) → 借出MIM
-      ├─→ Cauldron[5].cook(ACTION_REPAY) → 借出MIM
+      ├─→ Cauldron[0].cook(ACTION_BORROW) → 借出MIM
+      ├─→ Cauldron[1].cook(ACTION_BORROW) → 借出MIM  
+      ├─→ Cauldron[2].cook(ACTION_BORROW) → 借出MIM
+      ├─→ Cauldron[3].cook(ACTION_BORROW) → 借出MIM
+      ├─→ Cauldron[4].cook(ACTION_BORROW) → 借出MIM
+      ├─→ Cauldron[5].cook(ACTION_BORROW) → 借出MIM
       ├─→ BentoBox.withdraw(MIM) → 提取所有MIM
       ├─→ CurveRouter.exchange(MIM→3CRV) → 套现
       ├─→ Curve3Pool.remove_liquidity(3CRV→USDT) → 套现
@@ -524,39 +523,18 @@ BentoBox (1.7M MIM)
 在交易trace中，关键的漏洞触发发生在：
 
 ```
-Call: Cauldron.cook([5, 0], [0, 0], [encodedData, 0x])
-  ├─ SLOAD: userBorrowPart[攻击合约] = 0
-  ├─ SLOAD: totalBorrow.base = 1000000e18
-  ├─ 🚨 SUB: userBorrowPart[攻击合约] -= debtAmount  (应该还款但没有)
-  ├─ 🚨 SUB: totalBorrow.base -= debtAmount
-  ├─ CALL: BentoBox.transfer(MIM, Cauldron, 攻击合约, amount)
-  │   └─ ✅ Transfer成功 (资金被转走)
-  └─ ❌ MISSING: require(actualRepayment >= debtAmount)
+Call: Cauldron.cook([5, 0], [0, 0], [abi.encode(amount, to), 0x])
+  ├─ if (action==BORROW) → _borrow(to, amount)
+  ├─ Checks: total cap / per-address cap ✅
+  ├─ Effects: userBorrowPart[msg.sender] += part ✅
+  ├─ Interactions: BentoBox.transfer(MIM, Cauldron, 攻击合约, share) ✅
+  └─ End-of-cook: require(_isSolvent(msg.sender, rate)) 〈通过/依赖配置与Oracle〉
 ```
 
-**异常行为识别**：
-1. ❌ **没有MIM从攻击合约转入Cauldron**
-2. ❌ **没有调用MIM.transferFrom()**
-3. ✅ **但是userBorrowPart被减少了**
-4. ✅ **并且MIM从Cauldron转出给了攻击合约**
-
-#### 与正常交易的对比
-
-**正常Repay流程**:
-```
-用户 → Cauldron.cook(ACTION_REPAY)
-  ├─ MIM.transferFrom(用户, Cauldron, amount) ✅
-  ├─ userBorrowPart[用户] -= amount ✅
-  └─ emit LogRepay(用户, amount) ✅
-```
-
-**攻击交易流程**:
-```
-攻击者 → Cauldron.cook(ACTION_REPAY)
-  ├─ MIM.transferFrom(...) ❌ 未调用！
-  ├─ userBorrowPart[攻击者] -= amount ✅ 仍然执行
-  └─ Cauldron.transferTo(攻击者, amount) 🚨 资金被转走！
-```
+**关键观察**：
+1. ✅ 发生的是标准的借款路径（ACTION_BORROW），非还款路径。
+2. ✅ 资金从Cauldron在BentoBox的余额转出至攻击合约（share 转移）。
+3. ✅ 交易末尾进行了偿付能力检查；能通过取决于抵押/参数/Oracle。
 
 ## 🎯 根本原因分析 (Root Cause Analysis)
 
@@ -797,31 +775,14 @@ ROI: ∞ (零成本投入，百万级收益)
 
 **为什么这些措施没有生效？**
 
-1. **borrowLimit检查被绕过**：
-```solidity
-// 攻击者巧妙地利用了borrowLimit
-if (borrowlimit >= balavail) {  // 如果限额够大
-    // 就借出所有可用余额
-    // 🚨 但借款时假装要"repay"，绕过了真正的borrow检查
-}
-```
+1. 借款上限配置失当：
+   - 部分池的 per-address 上限与总上限过高，使得单地址可借≈池余额。
 
-2. **抵押品机制被绕过**：
-   - 攻击者声称要"repay"而不是"borrow"
-   - repay操作不需要抵押品
-   - 🚨 但实际上攻击者在"repay"的同时拿走了资产！
+2. 偿付能力检查依赖外部条件：
+   - 末尾的 `_isSolvent` 强依赖抵押参数与 Oracle；在低抵押率/价格延迟/配置异常时可被通过。
 
-3. **缺失的关键检查**：
-```solidity
-// ❌ 缺失的检查1: 资产转移前后的余额验证
-require(balanceAfter >= balanceBefore + amount, "No asset received");
-
-// ❌ 缺失的检查2: 用户必须先授权资产
-require(asset.allowance(msg.sender, address(this)) >= amount, "No approval");
-
-// ❌ 缺失的检查3: 实际执行transferFrom
-asset.transferFrom(msg.sender, address(this), amount);
-```
+3. 缺少借款前置约束：
+   - `_preBorrowAction` 为空，无法在借款前进行额外风控（如最小抵押、速率限制等）。
 
 **安全假设的错误**：
 - ❌ 假设：用户调用ACTION_REPAY = 用户会还款
@@ -846,7 +807,7 @@ asset.transferFrom(msg.sender, address(this), amount);
 - ✅ **类似案例**: 
   - Compound协议曾有类似的repay检查问题
   - 多个DeFi协议在还款逻辑上出现过漏洞
-- ✅ **已知攻击模式**: "Fake Repay"是已知的攻击向量
+- ✅ **已知风险模式**: 依赖配置/Oracle 的借款风控可被放大或误配
 
 #### 经济激励
 - 💰 **TVL**: Abracadabra的TVL在数亿美元级别
