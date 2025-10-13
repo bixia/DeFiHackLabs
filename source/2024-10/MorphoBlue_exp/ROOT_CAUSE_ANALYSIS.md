@@ -14,6 +14,17 @@
 
 ## 🔍 Technical Analysis
 
+## 🎯 根本原因
+- 利率模型基于瞬时利用率 `totalBorrow/totalSupply` 计算，缺少时间加权（TWAP/EMA）与变化速率上限，易被闪电贷在单笔交易内拉高/拉低利用率从而操纵利率。
+- 价格预言机合成依赖多资产余额/价格的即时读数，单交易内可被短时扭曲；与 multicall 原子组合放大影响。
+- 缺少对同一事务内“影响利率 → 借款/清算 → 读价/换仓”的策略约束与顺序限制。
+
+## 🛠️ 修复建议
+- 利率侧：采用 TWAP/EMA 平滑利用率与利率，设置单区块/单事务变化上限；跨区块生效（delay）。
+- 预言机侧：启用新鲜度阈值、偏移/离群保护、跨源一致性检查与断路器；尽量读跨区块价格（TWAP）。
+- 交易策略侧：禁止在单事务内串联会改变利用率与读取价格的关键操作（冷却时间/阶段化），限制高危 multicall 组合；基于波动率动态调参（LTV、清算阈值、最小健康因子）。
+
+
 Based on the provided transaction trace data and contract source code, I'll conduct a detailed analysis of the MorphoBlue exploit. The attack appears to be a sophisticated manipulation of the interest rate model and oracle system to extract funds.
 
 ### 1. Vulnerability Summary
