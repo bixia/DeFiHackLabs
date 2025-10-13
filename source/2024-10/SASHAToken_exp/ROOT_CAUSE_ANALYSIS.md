@@ -12,6 +12,24 @@
 - **Vulnerable Contract(s)**: 
 - **Attack Contract(s)**: 0x991493900674b10bdf54bdfe95b4e043257798cf
 
+## 🎯 根本原因
+
+SASHA 的 `_transfer` 通过 `auto1/auto2` 对地址分组，买卖费率由两映射控制，同时 `swapBack` 会在 `auto1[from]` 或 `auto2[to]` 条件下于转账中途卖出合约内代币。该设计存在：
+- 费率映射可错误配置或被用于将池子/路由置于“买/卖费为 0”的路径；
+- 允许直接向 V2 池转账操纵储备，再走 V3 路由大额卖出，规避/减轻费用；
+- `swapBack` 在转账中途执行，影响价格与储备时序，放大操纵收益。
+
+攻击流程（PoC）：
+1) 少量建仓后，向 V2 池转入固定量 SASHA；
+2) 走 V3 `exactInputSingle` 大额卖出，配合 0% 费及储备失衡套取 WETH；
+3) 提现 WETH 为 ETH 获利。
+
+## 🛠️ 修复建议
+- 明确并冻结 `auto1/auto2` 的仅读来源，禁止运行时随意标记/清除；
+- 保证任一自动做市对/路由地址在买卖路径上均施加非零、可验证的费率，或对 AMM 合约地址强制费率上限与最小滑点；
+- 禁止在 `_transfer` 中执行 `swapBack` 等会改变价格/储备的不确定副作用，改为定时/阈值驱动的独立流程；
+- 增加针对“向池子直接转账 + 异路由卖出”的监控与阻断逻辑。
+
 ## 🔍 Technical Analysis
 
 Based on the provided source code, transaction trace data, and POC, I'll conduct a detailed analysis of the exploit. The vulnerability appears to be a fee manipulation attack in the SASHA token contract, allowing the attacker to bypass intended fee mechanisms during swaps.
