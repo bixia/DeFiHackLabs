@@ -14,6 +14,17 @@
 
 ## 🔍 Technical Analysis
 
+## 🎯 根本原因
+- ERC314/自定义 sell 逻辑使用 `ethAmount = sell_amount * address(this).balance / (contractTokenBalance + sell_amount)` 等基于即时余额的比例分配，并在转账/回调过程中可被循环触发，导致在同一事务内凭借临时余额膨胀获取不成比例的 ETH。
+- 缺少重入/重入样式的调用保护；将经济结算与余额变动耦合于 `_transfer`/`receive`，次序上违背 checks-effects-interactions。
+
+## 🛠️ 修复建议
+- 拆分经济结算与转账逻辑：采用“提领”模型（pull over push），将 ETH 发放延后到状态稳定后进行；
+- 对 `sell`/`transfer` 路径加 `nonReentrant`；对用于计价的余额采用上一区块快照或 TWAP；
+- 禁止“向合约自身转账即触发卖出”的隐式路径，改为显式 API 并加限频/最小卖出量；
+- 对循环触发/同块多次触发加入冷却与全局上限。
+
+
 Based on the provided information, I'll conduct a deep technical analysis of the exploit. Let me break this down systematically.
 
 ### 1. Vulnerability Summary
