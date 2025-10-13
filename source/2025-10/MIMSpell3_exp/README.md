@@ -103,10 +103,7 @@ function _preBorrowAction(...) internal virtual {
 POC中的常量定义是**误导性**的：
 
 ```solidity
-// ❌ POC中的声称
-uint8 private constant ACTION_REPAY = 5;  
-
-// ✅ 实际Cauldron代码
+// ✅ 正确常量（以Cauldron代码为准）
 uint8 internal constant ACTION_REPAY = 2;
 uint8 internal constant ACTION_BORROW = 5;
 ```
