@@ -81,7 +81,7 @@ contract MIMSpell3Exploit is BaseTestWithBalanceLog {
     uint24 private constant UNISWAP_V3_FEE_TIER = 500; // 0.05%
 
     // Cauldron action types
-    uint8 private constant ACTION_BORROW = 5;
+    uint8 private constant ACTION_REPAY = 5;
     uint8 private constant ACTION_NO_OP = 0;
 
     // Curve swap parameters
@@ -133,7 +133,7 @@ contract MIMSpell3Exploit is BaseTestWithBalanceLog {
 
     function _borrowFromAllCauldrons() internal {
         uint8[] memory actions = new uint8[](2);
-        actions[0] = ACTION_BORROW;
+        actions[0] = ACTION_REPAY;
         actions[1] = ACTION_NO_OP;
 
         uint256[] memory values = new uint256[](2);
