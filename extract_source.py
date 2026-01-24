@@ -138,6 +138,32 @@ def extract_contract_info(file_path):
         
     return contracts, chain
 
+def get_implementation_address(contract_address, chain):
+    """Check if contract is a proxy and get implementation address."""
+    if chain not in CHAIN_CONFIGS:
+        return None
+        
+    chain_config = CHAIN_CONFIGS[chain]
+    
+    # Try to get implementation address using cast
+    cmd = [
+        'cast', 'implementation', contract_address,
+        '--rpc-url', chain_config['chain']
+    ]
+    
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        if result.returncode == 0 and result.stdout.strip():
+            impl_address = result.stdout.strip()
+            # Check if it's a valid address and not zero address
+            if impl_address.startswith('0x') and impl_address != '0x0000000000000000000000000000000000000000':
+                print(f"  Detected proxy contract. Implementation address: {impl_address}")
+                return impl_address
+    except Exception as e:
+        print(f"  Note: Could not check for proxy implementation: {e}")
+    
+    return None
+
 def get_source_code(contract_info, chain, output_dir):
     """Get source code for a contract using cast."""
     if chain not in CHAIN_CONFIGS:
@@ -149,17 +175,27 @@ def get_source_code(contract_info, chain, output_dir):
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
+    # Check if this is a proxy contract
+    original_address = contract_info['ca']
+    impl_address = get_implementation_address(original_address, chain)
+    
+    # Use implementation address if it's a proxy, otherwise use original
+    target_address = impl_address if impl_address else original_address
+    address_suffix = f"_impl_{impl_address}" if impl_address else f"_{original_address}"
+    
     # Construct output filename
-    output_file = os.path.join(output_dir, f"{contract_info['name']}_{contract_info['ca']}.sol")
+    output_file = os.path.join(output_dir, f"{contract_info['name']}{address_suffix}.sol")
     
     # Construct cast command
     cmd = [
-        'cast', 'et', contract_info['ca'],
+        'cast', 'et', target_address,
         '--etherscan-api-key', chain_config['api_key'],
         '-c', chain_config['chain'],
         '--flatten'
     ]
     
+    if impl_address:
+        print(f"Fetching implementation contract source code from {target_address}")
     print(f"Executing command: {' '.join(cmd)}")
     
     try:
